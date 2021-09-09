@@ -19,8 +19,8 @@ enum Roots
 
 int SolveSquare(double a, double b, double c, double *x1, double *x2);
 //bool CheckInput (??);
-inline bool Compare (double a, double b);//проверять равенство между собой и с нулем
-inline double CalcDiscriminant (double a, double b, double c);//может оказаться отрицательным и прочая хуйня
+inline bool Compare (double a, double b);
+inline double CalcDiscriminant (double a, double b, double c);
 
 
 #endif // SQUARE_EQ
