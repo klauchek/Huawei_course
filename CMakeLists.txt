@@ -6,8 +6,9 @@ enable_testing()
 
 add_executable(quadratic_equation 
 
-main.c
-square_eq.c)
+main.cpp
+square_eq.cpp
+)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
