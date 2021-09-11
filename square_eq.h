@@ -16,11 +16,15 @@ enum Roots
     ONE_ROOT = 1,
     TWO_ROOTS = 2
 };
-
-int SolveSquare(double a, double b, double c, double *x1, double *x2);
+//!TODO consts everywhere or no.
+int SolveSquare(const double a, const double b, const double c, double *x1, double *x2);
+int SolveLinear(const double b, const double c, double *x);
+//void/bool RunUnitTest ??
+//void/bool TestSquare ??
 //bool CheckInput (??);
-inline bool Compare (double a, double b);
-inline double CalcDiscriminant (double a, double b, double c);
+void PrintRoots(int number_of_roots, const double x1, const double x2);
+inline bool Compare (const double a, const double b);
+inline double CalcDiscriminant (const double a, const double b, const double c);
 
 
 #endif // SQUARE_EQ

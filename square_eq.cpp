@@ -16,27 +16,19 @@
 //!                 TWO_ROOTS if equation has two roots
 //----------------------------------------------------------------------
 
-int SolveSquare(double a, double b, double c, double *x1, double *x2)
+int SolveSquare(const double a, const double b, const double c, double *x1, double *x2)
 {
     assert(isfinite(a));
     assert(isfinite(b));
     assert(isfinite(c));
 
-    assert( x1 != NULL);
-    assert( x2 != NULL);
-    assert( x1 != x2);
+    assert(x1 != NULL);
+    assert(x2 != NULL);
+    assert(x1 != x2);
 
     if (Compare(a, 0.0))
     {
-        if (Compare(b, 0.0))
-        {
-            return (Compare(c, 0.0)) ? INF_ROOTS : ZERO_ROOTS;
-        }
-        else
-        {
-            *x1 = -c / b;
-            return ONE_ROOT;
-        }
+        SolveLinear(b, c, x1);
     }
     else
     {
@@ -63,6 +55,59 @@ int SolveSquare(double a, double b, double c, double *x1, double *x2)
 
 }
 
+//---------------------------------------------------------------------
+//! Solves a linear equation bx + c = 0  
+//! @param [in]  b   b‐coefficient 
+//! @param [in]  c   c‐coefficient 
+//! @param [out] x  Pointer to the 1st root 
+//! 
+//! @return Number of roots
+//!
+//! @note   Returns INF_ROOTS if equation has infinity amount of roots
+//!                 ZERO_ROOTS if equation has no roots in real numbers
+//!                 ONE_ROOT if equation has one root
+//----------------------------------------------------------------------
+
+int SolveLinear(const double b, const double c, double *x)
+{
+    if (Compare(b, 0.0))
+    {
+        return (Compare(c, 0.0)) ? INF_ROOTS : ZERO_ROOTS;
+    }
+    else
+    {
+        *x = -c / b;
+        return ONE_ROOT;
+    }
+}
+
+//---------------------------------------------------------------------
+//! Prints roots 
+//! @param [in]  number_of_roots   Number of roots 
+//! @param [out] x1                Pointer to the 1st root 
+//! @param [out] x2                Pointer to the 2nd root
+//----------------------------------------------------------------------
+
+void PrintRoots(int number_of_roots, const double x1, const double x2)
+{
+    switch (number_of_roots) //!TODO PrintRoots
+    {
+        case ONE_ROOT: 
+                printf("x = %lg\n", x1);
+                break;
+        
+        case TWO_ROOTS: 
+                printf("x1 = %lg, x2 = %lg\n", x1, x2);\
+                break;
+        
+        case INF_ROOTS: 
+                printf("Any number\n");
+                break;
+                
+        default: 
+                printf ("%s(): ERROR: Incorrect amount of roots: %d\n", __FUNCTION__, number_of_roots);
+    }
+}
 
 //------------------------------------------
 //! Compares two numbers
@@ -75,7 +120,7 @@ int SolveSquare(double a, double b, double c, double *x1, double *x2)
 //! @note   Accuracy is defined by EPSILON constant
 //------------------------------------------
 
-inline bool Compare (double a, double b)
+inline bool Compare (const double a, const double b)
 {
     return (fabs(a - b) < EPSILON);
 }
@@ -88,11 +133,9 @@ inline bool Compare (double a, double b)
 //!
 //! @return discriminant
 //------------------------------------------
-inline double CalcDiscriminant (double a, double b, double c)
+inline double CalcDiscriminant (const double a, const double b, const double c)
 {
     return b * b - 4 * a * c;
 }
 
 
-
-//bool CheckInput (??)
