@@ -59,7 +59,7 @@ int SolveSquare(const double a, const double b, const double c, double *x1, doub
 //! Solves a linear equation bx + c = 0  
 //! @param [in]  b   b‐coefficient 
 //! @param [in]  c   c‐coefficient 
-//! @param [out] x  Pointer to the 1st root 
+//! @param [out] x   Pointer to the root 
 //! 
 //! @return Number of roots
 //!
@@ -70,6 +70,11 @@ int SolveSquare(const double a, const double b, const double c, double *x1, doub
 
 int SolveLinear(const double b, const double c, double *x)
 {
+    assert(isfinite(b));
+    assert(isfinite(c));
+
+    assert(x != NULL);
+
     if (Compare(b, 0.0))
     {
         return (Compare(c, 0.0)) ? INF_ROOTS : ZERO_ROOTS;
@@ -123,6 +128,7 @@ void PrintRoots(int number_of_roots, const double x1, const double x2)
 //!
 //! @note   Accuracy is defined by EPSILON constant
 //------------------------------------------
+
 
 inline bool Compare (const double a, const double b)
 {
@@ -214,7 +220,10 @@ int TestSolveSquare(void)
   return 1;
 }
 
-/////////////////////////
+//---------------------------------------------------------------------
+//! Checks if input is correct 
+//! @param [in]  roots number of roots
+//----------------------------------------------------------------------
 void CheckInput(int roots)
 {
     if (roots != 3)

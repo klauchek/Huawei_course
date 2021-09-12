@@ -1,1 +1,2 @@
-# Quadratic_equation
+# Quadratic_Equations
+1st Huawei course project. A program for solving quadratic equation ```ax^2 + bx + c = 0```

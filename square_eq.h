@@ -16,7 +16,8 @@ enum Roots
     ONE_ROOT = 1,
     TWO_ROOTS = 2
 };
-//!TODO consts everywhere or no.
+
+
 int SolveSquare(const double a, const double b, const double c, double *x1, double *x2);
 int SolveLinear(const double b, const double c, double *x);
 int TestSolveSquare(void);
