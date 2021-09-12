@@ -20,7 +20,7 @@ enum Roots
 int SolveSquare(const double a, const double b, const double c, double *x1, double *x2);
 int SolveLinear(const double b, const double c, double *x);
 int TestSolveSquare(void);
-int UnitTest(double a, double b, double c, double x1, double x2, int number_of_roots, int test_number);
+int UnitTest(const double a, const double b, const double c, const double x1, const double x2, int number_of_roots, int test_number);
 void CheckInput(int roots);
 void PrintRoots(int number_of_roots, const double x1, const double x2);
 inline bool Compare (const double a, const double b);
