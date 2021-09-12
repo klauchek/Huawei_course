@@ -28,7 +28,7 @@ int SolveSquare(const double a, const double b, const double c, double *x1, doub
 
     if (Compare(a, 0.0))
     {
-        SolveLinear(b, c, x1);
+        return SolveLinear(b, c, x1);
     }
     else
     {
@@ -103,6 +103,10 @@ void PrintRoots(int number_of_roots, const double x1, const double x2)
         case INF_ROOTS: 
                 printf("Any number\n");
                 break;
+
+        case ZERO_ROOTS:
+                printf("No roots\n");
+                break;
                 
         default: 
                 printf ("%s(): ERROR: Incorrect amount of roots: %d\n", __FUNCTION__, number_of_roots);
@@ -138,4 +142,57 @@ inline double CalcDiscriminant (const double a, const double b, const double c)
     return b * b - 4 * a * c;
 }
 
+void CheckInput(int roots)
+{
+    if (roots != 3)
+        printf("Incorrect input\n");
+}
 
+
+//---------------------------------------------------------------------
+//! Tests SolveSquare function 
+//! @param [in]  a   a‐coefficient 
+//! @param [in]  b   b‐coefficient 
+//! @param [in]  c   c‐coefficient 
+//! @param [out] x1  1st expected root
+//! @param [out] x2  2nd expected root
+//! 
+//! @return 1 if test passed
+//!         0 if test failed
+//----------------------------------------------------------------------
+
+int UnitTest(double a, double b, double c, double x1, double x2, int number_of_roots, int test_number)
+{
+  // double root1 = NAN, root2 = NAN;
+  //  if (SolveSquare(a, b, c, &root1, &root2) == number_of_roots)
+
+
+
+}
+
+
+
+
+//------------------------------------------
+//! Runs UnitTests for SolveSquare function
+//------------------------------------------
+int TestSolveSquare(void)
+{
+  UnitTest(1, 1, 1, 0, 0, ZERO_ROOTS, 1);
+
+  UnitTest(1, 5, 6, -2, -3, TWO_ROOTS, 2);
+
+  UnitTest(1, 0, 0, 0, 0, ONE_ROOT, 3);
+
+  UnitTest(0, 5, 6, -6 / 5.0, 0, ONE_ROOT, 4);
+
+  UnitTest(0, 0, 6, 0, 0, ZERO_ROOTS, 5);
+
+  UnitTest(0, 0, 0, 0, 0, INF_ROOTS, 6);
+
+  UnitTest(0, 0.0000001, 5, -5 / 0.0000001, 0, ONE_ROOT, 7);
+
+  UnitTest(1, 0, -2, sqrt(2), -sqrt(2), TWO_ROOTS, 8);
+
+  return 1;
+}

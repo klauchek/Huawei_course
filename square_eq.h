@@ -19,9 +19,9 @@ enum Roots
 //!TODO consts everywhere or no.
 int SolveSquare(const double a, const double b, const double c, double *x1, double *x2);
 int SolveLinear(const double b, const double c, double *x);
-//void/bool RunUnitTest ??
-//void/bool TestSquare ??
-//bool CheckInput (??);
+int TestSolveSquare(void);
+int UnitTest(double a, double b, double c, double x1, double x2, int number_of_roots, int test_number);
+void CheckInput(int roots);
 void PrintRoots(int number_of_roots, const double x1, const double x2);
 inline bool Compare (const double a, const double b);
 inline double CalcDiscriminant (const double a, const double b, const double c);

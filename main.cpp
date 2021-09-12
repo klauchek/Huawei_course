@@ -3,14 +3,19 @@
 
 int main(void)
 {
+        if (TestSolveSquare())
+                printf("Unit Tests completed successfully.\n\n");
+        else
+                printf("Unit Tests failed.\n\n");
 
         printf("Square equation solver \n");
         printf("Enter the coefficients a, b, c:\n");
 
 
         double a = NAN, b = NAN, c = NAN;
-        scanf("%lg %lg %lg", &a, &b, &c); //!TODO check scanf return
-        //if (scnaf != 3) ??
+
+        int roots = scanf("%lg %lg %lg", &a, &b, &c);
+        CheckInput(roots);
 
         double x1 = NAN, x2 = NAN;
         int number_of_roots = SolveSquare (a, b, c, &x1, &x2);
