@@ -166,13 +166,14 @@ void SwapStrPtr(String** str1, String** str2)
     *str2 = temp;
 }
 
-void Qsort(String** string_ptrs, int left, int right, int (*comp)(const char *, const char *))
+void Qsort(String** string_ptrs, int low, int high, int (*comp)(const char *, const char *))
 { 
     assert(string_ptrs);
     assert(comp);
 
-    int last = right;
-    int first = left;
+    int left = low;
+    int right = high;
+
     if (left >= right) 
         return; /* в массиве менее двух элементов */
 
@@ -185,14 +186,14 @@ void Qsort(String** string_ptrs, int left, int right, int (*comp)(const char *, 
         while ((*comp)(mid, string_ptrs[right]->str_beg))
             --right;
         if (left <= right)
-        {
-            SwapStrPtr(&string_ptrs[left], &string_ptrs[right]);  
-            left++;
-            right--; 
-        }
+            SwapStrPtr(&string_ptrs[left++], &string_ptrs[right--]);
     }
-    Qsort(string_ptrs, left, last - 1, comp); 
-    Qsort(string_ptrs, last + 1, right, comp);
+
+        if (low < right)
+            Qsort(string_ptrs, low, right, Strcmp);
+
+        if (left < high)
+            Qsort(string_ptrs, left, high, Strcmp);
 }
 
 
