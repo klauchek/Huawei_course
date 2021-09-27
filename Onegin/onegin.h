@@ -10,20 +10,22 @@
 #include <sys/stat.h>
 
 
-
 struct String
 {
     const char* str_beg;
     const char* str_end; 
 };
 
-//void ReadFromFile();
 size_t FileSize(const char* file_name);
 char* CreateBuffer(FILE *file, int file_size);
 int CountStrings(char* Buffer, int file_size);
 String* CreateStringsBuffer(char* Buffer, int amount_of_strings, int size);
 String** CreateStringsPtrsBuffer(String* Strings, int amount_of_strings);
-bool check_sym(char sym);
+int Strcmp(const char* str1, const char* str2);
+bool CheckSym(char sym);
+void SwapStrPtr(String** str1, String** str2);
+void Qsort(String** string_ptrs, int left, int right, int (*comp)(const char *, const char *));
+void FileWrite(String** StringsPtrs, const int amount_of_strings, const char* output_file_name);
 
 
 

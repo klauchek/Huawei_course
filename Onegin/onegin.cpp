@@ -1,25 +1,6 @@
 #include "onegin.h"
 
 
-
-
-/*void ReadFromFile(const char **string_ptrs, const char *file_name)
-{
-    FILE* input = fopen(file_name, "rb");
-    char str[1000] = 
-    while()
-    {
-        fgets();
-        Index[i] = strdup(str);
-        i++
-    }
-
-    fclose(input);
-    
-} 
-*/
-
-
 //------------------------------------------------
 //определить размер файла
 size_t FileSize(const char* file_name)
@@ -39,7 +20,7 @@ size_t FileSize(const char* file_name)
 
 char *CreateBuffer(FILE *file, int file_size)
 {
-    assert(file != NULL);
+    assert(file);
 
     char *buffer = (char *)calloc (file_size, sizeof(char));
     fread(buffer, sizeof(char), file_size, file);
@@ -55,7 +36,6 @@ int CountStrings(char* Buffer, int size)
 
     int buf_counter = 0; //считает считанные символы
     int str_amount = 0; //считает строки
-    //будем считывать строку(детектить символы \n и заменять на \0 пока не дойдет до буквы)
     while(buf_counter < size)
     {
         if (Buffer[buf_counter] == '\n')
@@ -66,7 +46,7 @@ int CountStrings(char* Buffer, int size)
                 Buffer[buf_counter] = '\0';
                 ++buf_counter;
 
-                if(buf_counter == size)
+                if(buf_counter == size)  
                     break;
             }
         }
@@ -80,12 +60,12 @@ int CountStrings(char* Buffer, int size)
 //---------------------------
 String* CreateStringsBuffer(char* Buffer, int amount_of_strings, int size)
 {
+    assert(Buffer);
+    assert(size);
     assert(amount_of_strings);
 
     String* strings = (String *)calloc (amount_of_strings, sizeof (String));
 
-// НЕ ИСПОЛЬЗУЕМ СТРОКОВЫЕ ФУНКЦИИ, ПОЭТОМУ \0 МОЖЕТ БЫТЬ ВАЩЕ ЛЕВЫМ СИМВОЛОМ
-//НУЖНА ПРОВЕРКА НА ТО, ЧТО ОН ИМЕННО КОНЕЦ СТРОКИ, Т.Е. ПЕРЕД НИМ    Б У К В Ы, А ПОСЛЕ НЕГО КАКОЙ-ТО СИМВОЛ (ОБЯЩАТЕЛЬНО НЕ \0!!!!!! А КАКОЙ-ТО ДРУГОЙ )
     int str_counter = 0;
     int buf_counter = 0;
 
@@ -96,7 +76,7 @@ String* CreateStringsBuffer(char* Buffer, int amount_of_strings, int size)
         {
             //проверяем конец строки
             int end = buf_counter - 1;
-            if(!check_sym(Buffer[end])) //это НЕ конец строки, там какие-то пробельчики или табуляция
+            if(!CheckSym(Buffer[end])) 
             {
                 while(isspace(Buffer[end]))
                     --end;
@@ -108,9 +88,6 @@ String* CreateStringsBuffer(char* Buffer, int amount_of_strings, int size)
 
             while(Buffer[buf_counter] == '\0') //пошли дальше считать
                         ++buf_counter;
-
-        //if (str_counter % 13 == 0)
-        //printf("%d\n", str_counter);
         }
         else
         {
@@ -130,6 +107,7 @@ String* CreateStringsBuffer(char* Buffer, int amount_of_strings, int size)
 String** CreateStringsPtrsBuffer(String* Strings, int amount_of_strings)
 {
     assert(amount_of_strings);
+    assert(Strings);
 
     String** Strings_ptrs = (String **) calloc (amount_of_strings, sizeof (String *));
 
@@ -140,14 +118,98 @@ String** CreateStringsPtrsBuffer(String* Strings, int amount_of_strings)
     return Strings_ptrs;
 } 
 
+//------------------------------------------------------------
 
-bool check_sym(char sym)
+bool CheckSym(char sym)
 {
     if((isalnum(sym) || ispunct(sym)) && (sym != '\0'))
         return true;
     return false;
 }
 
+//-----------------------------------------------------------
+//сравниваются строки из Strings
+int Strcmp(const char* string1, const char* string2)
+{
+    assert(string1);
+    assert(string2);
 
-//обработка ошибок
-//compare strings
+    while (*string1 != '\0' && *string2 != '\0')
+    {
+        if (toupper (*string1) == toupper (*string2))//при совпадении продвигаемся далее
+        {
+            ++string1;
+            ++string2;
+        }
+        else //символы не совпали, но символ - не буква
+        {
+            if (!isalpha (*string1))
+                ++string1;
+            if (!isalpha (*string2))
+                ++string2;
+        }
+    }
+
+	
+	return toupper(*string1) - toupper(*string2);
+}
+
+//-----------------------------------------------
+
+void SwapStrPtr(String** str1, String** str2)
+{
+    assert(str1);
+    assert(str2);
+
+    String* temp = *str1;
+    *str1 = *str2;
+    *str2 = temp;
+}
+
+void Qsort(String** string_ptrs, int left, int right, int (*comp)(const char *, const char *))
+{ 
+    assert(string_ptrs);
+    assert(comp);
+
+    int last = right;
+    int first = left;
+    if (left >= right) 
+        return; /* в массиве менее двух элементов */
+
+    const char* mid = string_ptrs[(right + left)/2]->str_beg;
+
+    while(left <= right)
+    {
+        while ((*comp)(string_ptrs[left]->str_beg, mid))
+            ++left;
+        while ((*comp)(mid, string_ptrs[right]->str_beg))
+            --right;
+        if (left <= right)
+        {
+            SwapStrPtr(&string_ptrs[left], &string_ptrs[right]);  
+            left++;
+            right--; 
+        }
+    }
+    Qsort(string_ptrs, left, last - 1, comp); 
+    Qsort(string_ptrs, last + 1, right, comp);
+}
+
+
+//----------------------------------------------------------------
+void FileWrite(String** Strings_ptrs, const int amount_of_strings, const char* output_file_name)
+{
+    assert(Strings_ptrs);
+    assert(amount_of_strings);
+    assert(output_file_name);
+
+    FILE* output = fopen(output_file_name, "wb");
+
+    Qsort(Strings_ptrs, 0, amount_of_strings - 1, Strcmp);
+
+    fprintf(output, "Beginning sort\n\n");
+    for (int i = 0; i < amount_of_strings; ++i)
+        fprintf (output, "%s\n", Strings_ptrs[i]->str_beg);
+
+    fclose(output);
+}
