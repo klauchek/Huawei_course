@@ -20,7 +20,6 @@ size_t FileSize(const char* file_name);
 char* CreateBuffer(FILE *file, int file_size);
 int CountStrings(char* Buffer, int file_size);
 String* CreateStringsBuffer(char* Buffer, int amount_of_strings, int size);
-String** CreateStringsPtrsBuffer(String* Strings, int amount_of_strings);
 int Strcmp(const char* str1, const char* str2);
 bool CheckSym(char sym);
 void SwapStrPtr(String** str1, String** str2);

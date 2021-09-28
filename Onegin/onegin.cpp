@@ -25,98 +25,72 @@ char *CreateBuffer(FILE *file, int file_size)
     char *buffer = (char *)calloc (file_size, sizeof(char));
     fread(buffer, sizeof(char), file_size, file);
 
+    for (int i = 0; i < file_size; i++) {
+
+        printf ("%c", buffer[i]);
+
+    }
+
+    printf ("\n");
+
     return buffer;
 }
 
-//------------------------------------------------
-int CountStrings(char* Buffer, int size)
-{
-    assert(Buffer);
-    assert(size);
-
-    int buf_counter = 0; //считает считанные символы
-    int str_amount = 0; //считает строки
-    while(buf_counter < size)
-    {
-        if (Buffer[buf_counter] == '\n')
-        {
-            ++str_amount;
-            while(isspace(Buffer[buf_counter]) || (Buffer[buf_counter] == '\0'))
-            {
-                Buffer[buf_counter] = '\0';
-                ++buf_counter;
-
-                if(buf_counter == size)  
-                    break;
-            }
-        }
-        else
-            buf_counter++;
-    }
-
-    return str_amount;
-}
-
 //---------------------------
-String* CreateStringsBuffer(char* Buffer, int amount_of_strings, int size)
+int SeparateStrings(char* Buffer, String** strings, int size)
 {
     assert(Buffer);
     assert(size);
-    assert(amount_of_strings);
 
-    String* strings = (String *)calloc (amount_of_strings, sizeof (String));
+    int str_arr_size = 128; //START SIZE?
+    String* strings = (String *)calloc (str_arr_size, sizeof (String));
 
-    int str_counter = 0;
-    int buf_counter = 0;
+    char* cur_last = (char *)memchr(Buffer, '\n', size);
+    char* cur_start = Buffer;
 
-    while (buf_counter < size)
+    int counter = 0;
+
+    //отдельно проверка первой строки и сосчитать или не сосчитать ее 
+    if (isspace(*cur_start))
     {
-     
-        if (Buffer[buf_counter] == '\0')
-        {
-            //проверяем конец строки
-            int end = buf_counter - 1;
-            if(!CheckSym(Buffer[end])) 
-            {
-                while(isspace(Buffer[end]))
-                    --end;
-                //просто сдвигаем конец обратно
-            }
-            //это конец строки, все ок
-            strings[str_counter].str_end = &(Buffer[end]);
-            ++str_counter;
+        if (cur_start == cur_last)
+            cur_last = (char *)memchr(cur_start, '\n', size - *cur_start);
 
-            while(Buffer[buf_counter] == '\0') //пошли дальше считать
-                        ++buf_counter;
-        }
-        else
+        while (isspace(*cur_start))
+            ++cur_start;
+    }
+    strings[counter]->str_beg = cur_start;
+    strings[counter]->str_end = cur_last;
+    ++counter;
+
+    //fist was valid
+    while (cur_last != NULL)
+    {
+        cur_start = cur_last + 1;
+        while (isspace(*cur_start))
         {
-            if((buf_counter == 0)  || (Buffer[buf_counter - 1] == '\0'))
-                strings[str_counter].str_beg = &(Buffer[buf_counter]);
-            
-            ++buf_counter;
-        }  
+            if(*cur_start == size)
+                break;
+
+            if (*cur_start == '\n')
+                continue;
+            else
+                ++cur_start;
+        }
+
+        cur_last = (char *)memchr(cur_start, '\n', size - *cur_start);
+        strings[counter]->str_beg = cur_start;
+        strings[counter]->str_end = cur_last;
+        ++counter;
+
+        //выделить память реаллоком если нужно
     }
 
-    return strings;
+    //очистка реаллоком лишней выделенной памяти
+    return counter;
 }
 
 
-//----------------------------------------------------------
-
-String** CreateStringsPtrsBuffer(String* Strings, int amount_of_strings)
-{
-    assert(amount_of_strings);
-    assert(Strings);
-
-    String** Strings_ptrs = (String **) calloc (amount_of_strings, sizeof (String *));
-
-        //СВЯЗАТЬ ЭЛЕМЕНТЫ МАСССИВА СТРОК С ЭЛЕМЕНТАМИ МАССИВА УКАЗАТЕЛЕЙ
-    for (int i = 0; i < amount_of_strings; i++)
-        (Strings_ptrs)[i] = &(Strings)[i];
-
-    return Strings_ptrs;
-} 
 
 //------------------------------------------------------------
 
@@ -129,30 +103,64 @@ bool CheckSym(char sym)
 
 //-----------------------------------------------------------
 //сравниваются строки из Strings
-int Strcmp(const char* string1, const char* string2)
-{
-    assert(string1);
-    assert(string2);
+// int Strcmp(const void* str1, const void* str2)
+// {
+//     assert(str1);
+//     assert(str2);
 
-    while (*string1 != '\0' && *string2 != '\0')
-    {
-        if (toupper (*string1) == toupper (*string2))//при совпадении продвигаемся далее
-        {
-            ++string1;
-            ++string2;
-        }
-        else //символы не совпали, но символ - не буква
-        {
-            if (!isalpha (*string1))
-                ++string1;
-            if (!isalpha (*string2))
-                ++string2;
-        }
-    }
+//     const char* string1 = ((String**) str1)[0]->str_beg;
+//     const char* string2 = ((String**) str2)[0]->str_beg;
+
+//     while (*string1 != '\0' && *string2 != '\0')
+//     {
+//         if (toupper (*string1) == toupper (*string2))
+//         {
+//             ++string1;
+//             ++string2;
+//         }
+//         else 
+//         {
+//             if (!isalpha (*string1))
+//                 ++string1;
+//             if (!isalpha (*string2))
+//                 ++string2;
+//         }
+//     }
 
 	
-	return toupper(*string1) - toupper(*string2);
+// 	return toupper(*string1) - toupper(*string2);
+// }
+
+int Strcmp (const void *first, const void *second )
+{
+  assert (first);
+  assert (second);
+
+  const char* str1 = ((String**) str1)[0]->str_beg;
+  const char* str2 = ((String**) str2)[0]->str_beg;
+
+  size_t char_count_1 = 0;
+  size_t char_count_2 = 0;
+
+  while (*str1 != '\0' && *str2 != '\0')
+  {
+    while (ispunct (str1[0]) || isdigit (str1[0]) || isspace (str1[0]))
+      str1++;
+
+    while (ispunct (str2[0]) || isdigit (str2[0]) || isspace (str2[0]))
+      str2++;
+
+    while (tolower(str1[0]) == tolower(str2[0]) )
+    {
+      str1++;
+      str2++;
+    }
+    break;
+  }
+
+  return (tolower(str1[0]) - tolower(str2[0]));
 }
+
 
 //-----------------------------------------------
 
@@ -166,6 +174,7 @@ void SwapStrPtr(String** str1, String** str2)
     *str2 = temp;
 }
 
+/*
 void Qsort(String** string_ptrs, int low, int high, int (*comp)(const char *, const char *))
 { 
     assert(string_ptrs);
@@ -175,7 +184,7 @@ void Qsort(String** string_ptrs, int low, int high, int (*comp)(const char *, co
     int right = high;
 
     if (left >= right) 
-        return; /* в массиве менее двух элементов */
+        return; //в массиве менее двух элементов 
 
     const char* mid = string_ptrs[(right + left)/2]->str_beg;
 
@@ -194,11 +203,11 @@ void Qsort(String** string_ptrs, int low, int high, int (*comp)(const char *, co
 
         if (left < high)
             Qsort(string_ptrs, left, high, Strcmp);
-}
-
+} 
+*/
 
 //----------------------------------------------------------------
-void FileWrite(String** Strings_ptrs, const int amount_of_strings, const char* output_file_name)
+void FileWrite(String** Strings, const int amount_of_strings, const char* output_file_name)
 {
     assert(Strings_ptrs);
     assert(amount_of_strings);
@@ -206,11 +215,24 @@ void FileWrite(String** Strings_ptrs, const int amount_of_strings, const char* o
 
     FILE* output = fopen(output_file_name, "wb");
 
-    Qsort(Strings_ptrs, 0, amount_of_strings - 1, Strcmp);
+    qsort(Strings_ptrs, 0, amount_of_strings - 1, Strcmp);
 
+    for (int i = 0; i < amount_of_strings; i++) {
+
+        printf ("%s\n", Strings_ptrs[i]->str_beg);
+    }
     fprintf(output, "Beginning sort\n\n");
     for (int i = 0; i < amount_of_strings; ++i)
         fprintf (output, "%s\n", Strings_ptrs[i]->str_beg);
 
     fclose(output);
 }
+
+
+
+
+
+
+
+
+
