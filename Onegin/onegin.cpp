@@ -22,7 +22,7 @@ unsigned char *CreateBuffer(FILE *file, int file_size)
 {
     assert(file);
 
-    unsigned char *buffer = (unsigned char *)calloc (file_size, sizeof(char));
+    unsigned char *buffer = (unsigned char *)calloc (file_size + 1, sizeof(char));
     fread(buffer, sizeof(char), file_size, file);
     return buffer;
 }
@@ -39,25 +39,24 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
     assert(string_ptrs);
     
     unsigned char* cur_start = Buffer;        
+    
     unsigned char* cur_last = (unsigned char *)memchr(cur_start, '\n', size);
+    // exit (1);
 
-
-    printf("cur_start_prev: %c\n", *(cur_start - 1));
-    printf("cur_start: %c\n", *cur_start);
-    printf("cur_last_prev: %c\n", *(cur_last - 1));
-    printf("cur_last: %c\n", *cur_last);
+  
 
     unsigned char* prev_last = nullptr;
     size_t new_size = size;
     size_t counter = 0;
-
+    
     while (cur_last != NULL)
     {
-        if (cur_last - 1 == prev_last && *prev_last == '\n')
+        if (cur_last - 1 == prev_last)
             while (!isalpha(*cur_last))
                 ++cur_last;
 
         string_ptrs[counter].str_beg = cur_start;
+        string_ptrs[counter].str_beg[cur_last - cur_start] = '\0';
         string_ptrs[counter].length = cur_last - cur_start + 1;
 
         new_size = new_size - (cur_last - cur_start + 1);
@@ -65,19 +64,30 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
     
         cur_start = cur_last + 1;
         prev_last = cur_last;
+
+        
+
         cur_last = (unsigned char *)memchr(cur_start, '\n', new_size);
+        if (cur_last == NULL) 
+        {
+            string_ptrs[counter].str_beg = cur_start;
+            // for (int i = 0; i < new_size; ++i)
+            string_ptrs[counter].str_beg[new_size] = '\0';
+           *amount_of_strings = ++counter;
+           return string_ptrs;
+        }
 
-        if (need_allocate(counter, capacity, MORE))   
-            str_array_realloc(string_ptrs, &capacity, MORE); 
-    }
+        if (need_allocate(counter, capacity, LESS))   
+            str_array_realloc(string_ptrs, &capacity, LESS); 
     
+        
 
-        printf("cur_start_prev: %c\n", *(cur_start - 1));
-        printf("cur_start: %c\n", *cur_start);
-        printf("cur_last_prev: %c\n", *(cur_last - 1));
-        printf("cur_last: %c\n", *cur_last);
-        printf("\n");
-
+        // printf("cur_start_prev: %c\n", *(cur_start - 1));
+        // printf("cur_start: %c\n", *cur_start);
+        // printf("cur_last_prev: %c\n", *(cur_last - 1));
+        // printf("cur_last: %c\n", *cur_last);
+        // printf("\n");
+    }
 
     if (need_allocate(counter, capacity, LESS))   
         str_array_realloc(string_ptrs, &counter, LESS); 
@@ -141,9 +151,9 @@ void str_array_realloc(String* str_array, size_t* str_arr_size, enum Alloc flag)
 
     while ((*string1 != '\n') && (*string2 != '\n'))
     {
-        while(!isalpha (*string1) && (*string1 != '\n'))
+        while(!isalpha (*string1) && (*string1) != '\n')
             ++string1;
-        while(!isalpha (*string2) && (*string2 != '\n'))
+        while(!isalpha (*string2) && (*string2) != '\n')
             ++string2;
 
 
@@ -158,37 +168,37 @@ void str_array_realloc(String* str_array, size_t* str_arr_size, enum Alloc flag)
  	return toupper(*string1) - toupper(*string2);
 }
 
-/*
-int Strcmp (const void *first, const void *second )
-{
-  assert (first);
-  assert (second);
 
-  const unsigned char* str1 = ((String*) str1)[0].str_beg;
-  const unsigned char* str2 = ((String*) str2)[0].str_beg;
+// int Strcmp (const void *first, const void *second )
+// {
+//   assert (first);
+//   assert (second);
 
-  size_t char_count_1 = 0;
-  size_t char_count_2 = 0;
+//   const unsigned char* str1 = ((String*) str1)[0].str_beg;
+//   const unsigned char* str2 = ((String*) str2)[0].str_beg;
 
-  while (*str1 != '\0' && *str2 != '\0')
-  {
-    while (ispunct (str1[0]) || isdigit (str1[0]) || isspace (str1[0]))
-      str1++;
+//   size_t char_count_1 = 0;
+//   size_t char_count_2 = 0;
 
-    while (ispunct (str2[0]) || isdigit (str2[0]) || isspace (str2[0]))
-      str2++;
+//   while (*str1 != '\0' && *str2 != '\0')
+//   {
+//     while (ispunct (str1[0]) || isdigit (str1[0]) || isspace (str1[0]))
+//       str1++;
 
-    while (tolower(str1[0]) == tolower(str2[0]) )
-    {
-      str1++;
-      str2++;
-    }
-    break;
-  }
+//     while (ispunct (str2[0]) || isdigit (str2[0]) || isspace (str2[0]))
+//       str2++;
 
-  return (tolower(str1[0]) - tolower(str2[0]));
-}
-*/
+//     while (tolower(str1[0]) == tolower(str2[0]) )
+//     {
+//       str1++;
+//       str2++;
+//     }
+//     break;
+//   }
+
+//   return (tolower(str1[0]) - tolower(str2[0]));
+// }
+
 
 
 //-----------------------------------------------
@@ -246,43 +256,27 @@ void FileWrite(String* Strings, const int amount_of_strings, const char* output_
     assert(output_file_name);
 
     FILE* output = fopen(output_file_name, "w+");
-    printf ("%.*s\n", Strings[0].length, Strings[0].str_beg);
-    printf ("%.*s\n", Strings[1].length, Strings[1].str_beg);
-    printf ("%.*s\n", Strings[2].length, Strings[2].str_beg);
-    printf ("%.*s\n", Strings[3].length, Strings[3].str_beg);
-    printf ("%.*s\n", Strings[4].length, Strings[4].str_beg);
-
-
 
     printf("hui\n");
-    qsort(Strings, 0, amount_of_strings - 1, Strcmp);
+    qsort(Strings, amount_of_strings, sizeof (String), Strcmp);
     printf("hui2\n");
     
     
-    /*for (int i = 0; i < amount_of_strings; i++)
+    for (int i = 0; i < amount_of_strings; i++)
     {
         unsigned char* begin = Strings[i].str_beg;
         if(isspace(*begin))
             continue;
 
-        fprintf (output, "%.*s\n", Strings[i].length, begin);
+        fprintf (output, "%s\n", begin);
     }
-    */
-    printf ("%.*s\n", Strings[0].length, Strings[0].str_beg);
-    printf ("%.*s\n", Strings[1].length, Strings[1].str_beg);
-    printf ("%.*s\n", Strings[2].length, Strings[2].str_beg);
-    printf ("%.*s\n", Strings[3].length, Strings[3].str_beg);
-    printf ("%.*s\n", Strings[4].length, Strings[4].str_beg);
+    
+
 
     //fprintf(output, "Beginning sort\n\n");
-    printf ("str amount: %d\n", amount_of_strings);  
+   // printf ("str amount: %d\n", amount_of_strings);  
 
-
-    printf ("%.*s\n", Strings[0].length, Strings[0].str_beg);
-    printf ("%.*s\n", Strings[1].length, Strings[1].str_beg);
-    printf ("%.*s\n", Strings[2].length, Strings[2].str_beg);
-    printf ("%.*s\n", Strings[3].length, Strings[3].str_beg);
-    printf ("%.*s\n", Strings[4].length, Strings[4].str_beg);
+   // printf ("%.*s\n", Strings[3].length, Strings[3].str_beg);
 
 
     fclose(output);
