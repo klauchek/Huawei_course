@@ -2,22 +2,22 @@
 
 int main()
 {
-    // setlocale(LC_ALL, "Russian");
+    //setlocale(LC_ALL, "Russian");
 
-    const char* file_name = "SlavaPiska.txt";
+    int amount_of_strings = 0;
+    const char* file_name = "/home/mash/Code/Huawei_course/Onegin/SlavaPiska.txt";
     FILE* input = fopen(file_name, "rb");
 
     size_t file_size = FileSize(file_name);
     printf("filesize %ld\n", file_size);
-    char* Buffer = CreateBuffer(input, file_size);
+    unsigned char* Buffer = CreateBuffer(input, file_size);
 
-   // int amount_of_strings = (Buffer, file_size);
-   // printf("srt amount: %d\n", amount_of_strings);
+    String* strings = SeparateStrings(Buffer, file_size, &amount_of_strings);
+    printf("str amount: %d\n", amount_of_strings);
+ 
+    FileWrite(strings, amount_of_strings, "onegin_sorted.txt");
 
-    
-    FileWrite(Strings_ptrs, amount_of_strings, "onegin_sorted.txt");
-
-    free (Strings);
+    free (strings);
     free (Buffer);
 
 
