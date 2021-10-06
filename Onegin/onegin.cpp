@@ -33,7 +33,7 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
     assert(Buffer);
     assert(size);
 
-    size_t capacity = 512;//START SIZE?
+    size_t capacity = START_SIZE;
     
     String* string_ptrs = (String *)calloc (capacity, sizeof (String));
     assert(string_ptrs);
@@ -41,119 +41,69 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
     unsigned char* cur_start = Buffer;        
     
     unsigned char* cur_last = (unsigned char *)memchr(cur_start, '\n', size);
-    // exit (1);
 
-  
-
-    unsigned char* prev_last = nullptr;
     size_t new_size = size;
     size_t counter = 0;
     
-    while (cur_last != NULL)
+    while (*cur_last != '\0')
     {
-        if (cur_last - 1 == prev_last)
-            while (!isalpha(*cur_last))
-                ++cur_last;
-
         string_ptrs[counter].str_beg = cur_start;
-        string_ptrs[counter].str_beg[cur_last - cur_start] = '\0';
-        string_ptrs[counter].length = cur_last - cur_start + 1;
+
+        unsigned char* end = cur_last - 1;
+        while(isspace(*end))
+            --end;
+
+        string_ptrs[counter].str_beg[end - cur_start] = '\0';
+        string_ptrs[counter].length = end - cur_start + 1;
 
         new_size = new_size - (cur_last - cur_start + 1);
         ++counter;
     
         cur_start = cur_last + 1;
-        prev_last = cur_last;
-
-        
 
         cur_last = (unsigned char *)memchr(cur_start, '\n', new_size);
+
         if (cur_last == NULL) 
         {
             string_ptrs[counter].str_beg = cur_start;
-            // for (int i = 0; i < new_size; ++i)
             string_ptrs[counter].str_beg[new_size] = '\0';
            *amount_of_strings = ++counter;
            return string_ptrs;
         }
 
-        if (need_allocate(counter, capacity, LESS))   
-            str_array_realloc(string_ptrs, &capacity, LESS); 
+        if((capacity - counter) < DELTA)
+        {
+            capacity *= 2;
+            string_ptrs = (String*)realloc(string_ptrs, sizeof(String) * capacity);
+        }
     
-        
-
-        // printf("cur_start_prev: %c\n", *(cur_start - 1));
-        // printf("cur_start: %c\n", *cur_start);
-        // printf("cur_last_prev: %c\n", *(cur_last - 1));
-        // printf("cur_last: %c\n", *cur_last);
-        // printf("\n");
     }
 
-    if (need_allocate(counter, capacity, LESS))   
-        str_array_realloc(string_ptrs, &counter, LESS); 
+    if (capacity != counter)
+        string_ptrs = (String*) realloc(string_ptrs, sizeof(String) * counter);
 
     *amount_of_strings = ++counter;
     return string_ptrs;
 }
 
 
-
-
-inline bool need_allocate(size_t size, size_t capacity, enum Alloc flag) {
-    if (flag)
-        return (size != capacity);      /* if size != capacity => return false => allocate is need */
-    return (capacity - size) < DELTA;
-}
-
-
-//----------------------------------------------------------------------------
-
-void str_array_realloc(String* str_array, size_t* str_arr_size, enum Alloc flag) {
-
-    assert(str_array);
-    assert(str_arr_size);
-
-    if (flag)
-        *str_arr_size *= 2; 
-
-    String* new_str_arr = (String*) realloc(str_array, sizeof(String) * (*str_arr_size));
-    assert(new_str_arr);
-
-    str_array = new_str_arr;
-}
-
-
-
-       /* 
-       кусок для проверки первой строки
-
-       if (cur_start == cur_last)
-        {
-            cur_last = (unsigned char *)memchr(cur_start, '\n', size - (cur_start - Buffer));
-            while(isspace(*cur_start))
-                ++cur_start;
-            ++counter;
-        }
-*/
-
-
 //-----------------------------------------------------------
 //сравниваются строки из Strings
- int Strcmp(const void* str1, const void* str2)
+ int StrcmpBegin(const void* str1, const void* str2)
  {
      assert(str1);
      assert(str2);
 
-     const unsigned char* string1 = ((String*) str1)[0].str_beg;
-     const unsigned char* string2 = ((String*) str2)[0].str_beg;
+     const unsigned char* string1 = ((String*) str1)->str_beg;
+     const unsigned char* string2 = ((String*) str2)->str_beg;
     
     
 
-    while ((*string1 != '\n') && (*string2 != '\n'))
+    while ((*string1 != '\0') && (*string2 != '\0'))
     {
-        while(!isalpha (*string1) && (*string1) != '\n')
+        while(!isalpha (*string1) && (*string1) != '\0')
             ++string1;
-        while(!isalpha (*string2) && (*string2) != '\n')
+        while(!isalpha (*string2) && (*string2) != '\0')
             ++string2;
 
 
@@ -168,37 +118,35 @@ void str_array_realloc(String* str_array, size_t* str_arr_size, enum Alloc flag)
  	return toupper(*string1) - toupper(*string2);
 }
 
+ int StrcmpEnd(const void* str1, const void* str2)
+{
+    assert(str1);
+    assert(str2);
 
-// int Strcmp (const void *first, const void *second )
-// {
-//   assert (first);
-//   assert (second);
+    const unsigned char* string1 = ((String*) str1)->str_beg + (((String*) str1)->length - 1);
+    const unsigned char* string2 = ((String*) str2)->str_beg + (((String*) str2)->length - 1);
+    const unsigned char* string1_end = ((String*) str1)->str_beg + (((String*) str1)->length - 1);
+    const unsigned char* string2_end = ((String*) str2)->str_beg + (((String*) str2)->length - 1);
 
-//   const unsigned char* str1 = ((String*) str1)[0].str_beg;
-//   const unsigned char* str2 = ((String*) str2)[0].str_beg;
 
-//   size_t char_count_1 = 0;
-//   size_t char_count_2 = 0;
 
-//   while (*str1 != '\0' && *str2 != '\0')
-//   {
-//     while (ispunct (str1[0]) || isdigit (str1[0]) || isspace (str1[0]))
-//       str1++;
+    while (true)
+    {
+        while(!isalpha (*string1) && (string1_end - string1 != ((String*) str1)->length - 1))
+            --string1;
+        while(!isalpha (*string2) && (string2_end - string2 != ((String*) str2)->length - 1))
+            --string2;
 
-//     while (ispunct (str2[0]) || isdigit (str2[0]) || isspace (str2[0]))
-//       str2++;
+        if (toupper (*string1) != toupper (*string2) || string1 == ((String*)str1)->str_beg || string1 == ((String*)str1)->str_beg)
+            break;
 
-//     while (tolower(str1[0]) == tolower(str2[0]) )
-//     {
-//       str1++;
-//       str2++;
-//     }
-//     break;
-//   }
+        --string1;
+        --string2;
 
-//   return (tolower(str1[0]) - tolower(str2[0]));
-// }
+    }
 
+    return toupper(*string1) - toupper(*string2);
+}
 
 
 //-----------------------------------------------
@@ -214,7 +162,7 @@ void SwapStrPtr(String** str1, String** str2)
 }
 
 /*
-void Qsort(String** string_ptrs, int low, int high, int (*comp)(const char *, const char *))
+void Qsort(String* string_ptrs, int low, int high, int (*comp)(const void *, const void *))
 { 
     assert(string_ptrs);
     assert(comp);
@@ -243,8 +191,8 @@ void Qsort(String** string_ptrs, int low, int high, int (*comp)(const char *, co
         if (left < high)
             Qsort(string_ptrs, left, high, Strcmp);
 } 
-*/
 
+*/
 
 
 
@@ -257,11 +205,9 @@ void FileWrite(String* Strings, const int amount_of_strings, const char* output_
 
     FILE* output = fopen(output_file_name, "w+");
 
-    printf("hui\n");
-    qsort(Strings, amount_of_strings, sizeof (String), Strcmp);
-    printf("hui2\n");
+    qsort(Strings, amount_of_strings, sizeof (String), StrcmpBegin);
     
-    
+    fprintf(output, "Beginning sort\n\n");
     for (int i = 0; i < amount_of_strings; i++)
     {
         unsigned char* begin = Strings[i].str_beg;
@@ -270,13 +216,6 @@ void FileWrite(String* Strings, const int amount_of_strings, const char* output_
 
         fprintf (output, "%s\n", begin);
     }
-    
-
-
-    //fprintf(output, "Beginning sort\n\n");
-   // printf ("str amount: %d\n", amount_of_strings);  
-
-   // printf ("%.*s\n", Strings[3].length, Strings[3].str_beg);
 
 
     fclose(output);

@@ -16,27 +16,17 @@ struct String
     int length; 
 };
 
-enum Alloc
-{
-    MORE = 1,
-    LESS = 0,
-    DELTA = 50,
-    START_SIZE = 512
-};
+const long int START_SIZE = 512;
+const int DELTA = 100;
 
 size_t FileSize(const char* file_name);
 unsigned char* CreateBuffer(FILE *file, int file_size);
 String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strings);
-int Strcmp(const unsigned char* str1, const unsigned char* str2);
-
-bool CheckSym(char sym);
+int StrcmpBegin(const void* str1, const void* str2);
+int StrcmpEnd(const void* str1, const void* str2);
 void SwapStrPtr(String** str1, String** str2);
 void Qsort(String** string_ptrs, int left, int right, int (*comp)(const char *, const char *));
 void FileWrite(String* Strings, const int amount_of_strings, const char* output_file_name);
-
-inline bool need_allocate(size_t size, size_t capacity, enum Alloc flag);
-
-void str_array_realloc(String* str_array, size_t* str_arr_size, enum Alloc flag);
 
 
 
