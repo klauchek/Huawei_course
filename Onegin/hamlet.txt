@@ -1,9 +1,6 @@
 THE TRAGEDY OF HAMLET, PRINCE OF DENMARK
 
-
 by William Shakespeare
-
-
 
 Dramatis Personae
 
@@ -36,9 +33,6 @@ Ophelia, daughter to Polonius.
 Ghost of Hamlet's Father.
 
 Lords, ladies, Officers, Soldiers, Sailors, Messengers, Attendants.
-
-
-
 
 
 SCENE.- Elsinore.
@@ -253,9 +247,6 @@ Do you consent we shall acquaint him with it,
 As needful in our loves, fitting our duty?
 Let's do't, I pray; and I this morning know
 Where we shall find him most conveniently.           Exeunt.
-
-
-
 
 Scene II.
 Elsinore. A room of state in the Castle.
@@ -547,9 +538,6 @@ Till then sit still, my soul. Foul deeds will rise,
 Though all the earth o'erwhelm them, to men's eyes.
 Exit.
 
-
-
-
 Scene III.
 Elsinore. A room in the house of Polonius.
 
@@ -701,9 +689,6 @@ Look to't, I charge you. Come your ways.
 Oph. I shall obey, my lord.
                                                       Exeunt.
 
-
-
-
 Scene IV.
 Elsinore. The platform before the Castle.
 
@@ -817,9 +802,6 @@ Mar. Something is rotten in the state of Denmark.
 Hor. Heaven will direct it.
 Mar. Nay, let's follow him.
                                                       Exeunt.
-
-
-
 
 Scene V.
 Elsinore. The Castle. Another part of the fortifications.
@@ -1044,9 +1026,6 @@ The time is out of joint. O cursed spite
 That ever I was born to set it right!
 Nay, come, let's go together.  
                                                       Exeunt.
-
-
-
 
 Act II. Scene I.
 Elsinore. A room in the house of Polonius.
@@ -1833,9 +1812,6 @@ More relative than this. The play's the thing
 Wherein I'll catch the conscience of the King.         Exit.
 
 
-
-
-
 ACT III. Scene I.
 Elsinore. A room in the Castle.
 
@@ -2044,8 +2020,6 @@ To England send him; or confine him where
 Your wisdom best shall think.
 King. It shall be so.
 Madness in great ones must not unwatch'd go.         Exeunt.
-
-
 
 
 Scene II.
@@ -2484,8 +2458,6 @@ How in my words somever she be shent,
 To give them seals never, my soul, consent!             Exit.
 
 
-
-
 Scene III.
 A room in the Castle.
 
@@ -2600,8 +2572,6 @@ As hell, whereto it goes. My mother stays.
 This physic but prolongs thy sickly days.              Exit.
 King. [rises] My words fly up, my thoughts remain below.
 Words without thoughts never to heaven go.             Exit.
-
-
 
 
 Scene IV.
@@ -2858,8 +2828,6 @@ Good night, mother.
 
 
 
-
-
 ACT IV. Scene I.
 Elsinore. A room in the Castle.
 
@@ -2919,8 +2887,6 @@ My soul is full of discord and dismay.
                                                       Exeunt.
 
 
-
-
 Scene II.
 Elsinore. A passage in the Castle.
 
@@ -2957,8 +2923,6 @@ The King is a thing-
 Guil. A thing, my lord?
 Ham. Of nothing. Bring me to him. Hide fox, and all after.
                                                       Exeunt.
-
-
 
 
 Scene III.
@@ -3048,9 +3012,6 @@ And thou must cure me. Till I know 'tis done,
 Howe'er my haps, my joys were ne'er begun.             Exit.
 
 
-
-
-
 Scene IV.
 Near Elsinore.
 
@@ -3129,9 +3090,6 @@ Whereon the numbers cannot try the cause,
 Which is not tomb enough and continent
 To hide the slain? O, from this time forth,
 My thoughts be bloody, or be nothing worth!            Exit.
-
-
-
 
 
 Scene V.
@@ -3412,9 +3370,6 @@ I pray you go with me.
                                                       Exeunt
 
 
-
-
-
 Scene VI.
 Elsinore. Another room in the Castle.
 
@@ -3453,9 +3408,6 @@ for England. Of them I have much to tell thee. Farewell.
 Come, I will give you way for these your letters,
 And do't the speedier that you may direct me
 To him from whom you brought them.                   Exeunt.
-
-
-
 
 
 Scene VII.
@@ -3684,9 +3636,6 @@ How much I had to do to calm his rage I
 Now fear I this will give it start again;
 Therefore let's follow.
                                                       Exeunt.
-
-
-
 
 
 ACT V. Scene I.
@@ -4008,8 +3957,6 @@ This grave shall have a living monument.
 An hour of quiet shortly shall we see;
 Till then in patience our proceeding be.
                                                       Exeunt.
-
-
 
 
 Scene II.
@@ -4457,4 +4404,3 @@ Go, bid the soldiers shoot.
 
 
 THE END
-

@@ -1,8 +1,12 @@
 #include "onegin.h"
 
 
-//------------------------------------------------
-//определить размер файла
+//---------------------------------------------------------------------
+//! Function for defining the size of the file
+//! @param [in]  file_name   name of the file 
+//! 
+//! @return size of the file
+//----------------------------------------------------------------------
 size_t FileSize(const char* file_name)
 { 
   assert (file_name);
@@ -12,11 +16,14 @@ size_t FileSize(const char* file_name)
 
   return buff.st_size;
 }
-//----------------------------------------
 
-
-//-----------------------------------------------
-//считать полностью весь текст в буфер
+//---------------------------------------------------------------------
+//! Fuinctuon for creating a buffer with text from file
+//! @param [in]  file        file 
+//! @param [in]  file_size   size of the file 
+//! 
+//! @return buffer with text
+//----------------------------------------------------------------------
 
 unsigned char *CreateBuffer(FILE *file, int file_size)
 {
@@ -27,7 +34,11 @@ unsigned char *CreateBuffer(FILE *file, int file_size)
     return buffer;
 }
 
-//---------------------------
+
+//---------------------------------------------------------------------
+//! Fuinctuon for separating strings
+//
+//----------------------------------------------------------------------
 String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strings)
 {
     assert(Buffer);
@@ -38,8 +49,7 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
     String* string_ptrs = (String *)calloc (capacity, sizeof (String));
     assert(string_ptrs);
     
-    unsigned char* cur_start = Buffer;        
-    
+    unsigned char* cur_start = Buffer;       
     unsigned char* cur_last = (unsigned char *)memchr(cur_start, '\n', size);
 
     size_t new_size = size;
@@ -47,7 +57,35 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
     
     while (*cur_last != '\0')
     {
+        /*
+        unsigned char* begin = cur_start;
+        unsigned char* end = cur_last;
+
+        if(isspace(*begin))
+            while (isspace(*begin))
+            {
+                ++begin;
+                *begin = '\0';
+            }
+        if(isspace(*end))
+            while (isspace(*end))
+            {
+                --end;
+                *end = '\0';
+            }
+            
+        string_ptrs[counter].str_beg = begin;
+
+       // string_ptrs[counter].str_beg[cur_last - cur_start] = '\0';
+        string_ptrs[counter].length = end - begin + 1;
+        new_size = new_size - (cur_last - cur_start + 1);
+        ++counter;
+
+*/
+                    
         string_ptrs[counter].str_beg = cur_start;
+
+        //unsigned char* end = cur_last - 1;
 
         string_ptrs[counter].str_beg[cur_last - cur_start] = '\0';
         string_ptrs[counter].length = cur_last - cur_start + 1;
@@ -69,6 +107,7 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
         if((capacity - counter) < DELTA)
         {
             capacity *= 2;
+            //! FIXME: creatwe tmp_str_ptrs
             string_ptrs = (String*)realloc(string_ptrs, sizeof(String) * capacity);
         }
     
@@ -82,8 +121,10 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
 }
 
 
-//-----------------------------------------------------------
-//сравниваются строки из Strings
+//---------------------------------------------------------------------
+//! Fuinctuon for comparing strings from the beginning
+//
+//----------------------------------------------------------------------
  int StrcmpBegin(const void* str1, const void* str2)
  {
      assert(str1);
@@ -113,6 +154,11 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
  	return toupper(*string1) - toupper(*string2);
 }
 
+
+//---------------------------------------------------------------------
+//! Fuinctuon for comparing strings from the end
+//
+//----------------------------------------------------------------------
  int StrcmpEnd(const void* str1, const void* str2)
 {
     assert(str1);
@@ -131,7 +177,7 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
         while(!isalpha (*string2) && (string2_end - string2 != ((String*) str2)->length - 1))
             --string2;
 
-        if (toupper (*string1) != toupper (*string2) || string1 == ((String*)str1)->str_beg || string2 == ((String*)str2)->str_beg)
+        if (toupper (*string1) != toupper (*string2)|| string1 == ((String*)str1)->str_beg || string2 == ((String*)str2)->str_beg)
             break;
 
         --string1;
@@ -139,12 +185,13 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
 
     }
 
-    return toupper(*string1) - toupper(*string2);
+    return toupper(*string1) - toupper(*string2); 
 }
 
-
-//-----------------------------------------------
-
+//---------------------------------------------------------------------
+//! My qsort fuinctuon
+//
+//----------------------------------------------------------------------
 void Qsort(String* strings, int low, int high, int (*comp)(const void* str1, const void* str2)) {
 
     assert(strings);
@@ -176,7 +223,10 @@ void Qsort(String* strings, int low, int high, int (*comp)(const void* str1, con
     Qsort(strings, end + 1, high, comp);
 }
 
-//--------------------------------------------------
+//---------------------------------------------------------------------
+//! Fuinctuon for swapping strings
+//
+//----------------------------------------------------------------------
 void SwapStrs(String* str1, String* str2) {
 
     assert(str1);
@@ -188,7 +238,10 @@ void SwapStrs(String* str1, String* str2) {
 }
 
 
-//----------------------------------------------------------------
+//---------------------------------------------------------------------
+//! Fuinctuon for writing sorted text to file 
+//
+//----------------------------------------------------------------------
 void FileWrite(String* Strings, const int amount_of_strings, const char* output_file_name)
 {
     assert(Strings);
@@ -197,17 +250,18 @@ void FileWrite(String* Strings, const int amount_of_strings, const char* output_
 
     FILE* output = fopen(output_file_name, "w+");
 
-    //qsort(Strings, amount_of_strings, sizeof (String), StrcmpBegin);
-    Qsort(Strings, 0, amount_of_strings - 1, StrcmpBegin);
+    //qsort(Strings, amount_of_strings, sizeof (String), StrcmpEnd);
+    qsort(Strings, amount_of_strings, sizeof (String), StrcmpBegin);
+    //Qsort(Strings, 0, amount_of_strings - 1, StrcmpEnd);
+    //Qsort(Strings, 0, amount_of_strings - 1, StrcmpBegin);
     
     fprintf(output, "Beginning sort\n\n");
     for (int i = 0; i < amount_of_strings; i++)
     {
         unsigned char* begin = Strings[i].str_beg;
-        if(isspace(*begin))
+        if(*begin == '\0' || isspace(*begin))
             continue;
-        
-        fprintf(output, "%.*s\n", (int)Strings[i].length, begin);
+        fprintf(output, "%s\n", begin);
     }
 
 
