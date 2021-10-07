@@ -49,14 +49,10 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
     {
         string_ptrs[counter].str_beg = cur_start;
 
-        unsigned char* end = cur_last - 1;
-        while(isspace(*end))
-            --end;
-
-        string_ptrs[counter].str_beg[end - cur_start] = '\0';
-        string_ptrs[counter].length = end - cur_start + 1;
-
+        string_ptrs[counter].str_beg[cur_last - cur_start] = '\0';
+        string_ptrs[counter].length = cur_last - cur_start + 1;
         new_size = new_size - (cur_last - cur_start + 1);
+        printf("new size is %d\n", new_size);
         ++counter;
     
         cur_start = cur_last + 1;
@@ -129,7 +125,6 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
     const unsigned char* string2_end = ((String*) str2)->str_beg + (((String*) str2)->length - 1);
 
 
-
     while (true)
     {
         while(!isalpha (*string1) && (string1_end - string1 != ((String*) str1)->length - 1))
@@ -137,7 +132,7 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
         while(!isalpha (*string2) && (string2_end - string2 != ((String*) str2)->length - 1))
             --string2;
 
-        if (toupper (*string1) != toupper (*string2) || string1 == ((String*)str1)->str_beg || string1 == ((String*)str1)->str_beg)
+        if (toupper (*string1) != toupper (*string2) || string1 == ((String*)str1)->str_beg || string2 == ((String*)str2)->str_beg)
             break;
 
         --string1;
@@ -205,7 +200,7 @@ void FileWrite(String* Strings, const int amount_of_strings, const char* output_
 
     FILE* output = fopen(output_file_name, "w+");
 
-    qsort(Strings, amount_of_strings, sizeof (String), StrcmpBegin);
+    qsort(Strings, amount_of_strings, sizeof (String), StrcmpEnd);
     
     fprintf(output, "Beginning sort\n\n");
     for (int i = 0; i < amount_of_strings; i++)
