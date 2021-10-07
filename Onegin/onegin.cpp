@@ -145,20 +145,20 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
 
 //-----------------------------------------------
 
-void SwapStrPtr(String** str1, String** str2)
+void SwapStrPtr(String* str1, String* str2)
 {
     assert(str1);
     assert(str2);
 
-    String* temp = *str1;
+    String temp = *str1;
     *str1 = *str2;
     *str2 = temp;
 }
 
-/*
-void Qsort(String* string_ptrs, int low, int high, int (*comp)(const void *, const void *))
+
+void Qsort(String* strings, int low, int high, int (*comp)(const void *, const void *))
 { 
-    assert(string_ptrs);
+    assert(strings);
     assert(comp);
 
     int left = low;
@@ -167,26 +167,27 @@ void Qsort(String* string_ptrs, int low, int high, int (*comp)(const void *, con
     if (left >= right) 
         return; //в массиве менее двух элементов 
 
-    const char* mid = string_ptrs[(right + left)/2]->str_beg;
+    const unsigned char* mid = strings[(right + left)/2].str_beg;
 
     while(left <= right)
     {
-        while ((*comp)(string_ptrs[left]->str_beg, mid))
+        while ((*comp)(strings[left].str_beg, mid))
             ++left;
-        while ((*comp)(mid, string_ptrs[right]->str_beg))
+        while ((*comp)(mid, strings[right].str_beg))
             --right;
         if (left <= right)
-            SwapStrPtr(&string_ptrs[left++], &string_ptrs[right--]);
+            ++left;
+            --right;
+            SwapStrPtr(&strings[left], &strings[right]);
     }
 
         if (low < right)
-            Qsort(string_ptrs, low, right, Strcmp);
+            Qsort(strings, low, right, StrcmpBegin);
 
         if (left < high)
-            Qsort(string_ptrs, left, high, Strcmp);
+            Qsort(strings, left, high, StrcmpBegin);
 } 
 
-*/
 
 
 
@@ -199,7 +200,8 @@ void FileWrite(String* Strings, const int amount_of_strings, const char* output_
 
     FILE* output = fopen(output_file_name, "w+");
 
-    qsort(Strings, amount_of_strings, sizeof (String), StrcmpEnd);
+    //qsort(Strings, amount_of_strings, sizeof (String), StrcmpBegin);
+    Qsort(Strings, 0, amount_of_strings - 1, StrcmpBegin);
     
     fprintf(output, "Beginning sort\n\n");
     for (int i = 0; i < amount_of_strings; i++)
@@ -207,8 +209,8 @@ void FileWrite(String* Strings, const int amount_of_strings, const char* output_
         unsigned char* begin = Strings[i].str_beg;
         if(isspace(*begin))
             continue;
-
-        fprintf (output, "%s\n", begin);
+        
+        fprintf(output, "%.*s\n", (int)Strings[i].length, begin);
     }
 
 
