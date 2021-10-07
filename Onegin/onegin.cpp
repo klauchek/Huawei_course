@@ -145,8 +145,40 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
 
 //-----------------------------------------------
 
-void SwapStrPtr(String* str1, String* str2)
-{
+void Qsort(String* strings, int low, int high, int (*comp)(const void* str1, const void* str2)) {
+
+    assert(strings);
+
+    if (low >= high)
+        return;
+
+    int pivot = low;
+    int begin = low;
+    int end = high;
+
+    while (begin < end)
+    {
+        while (comp(strings + begin, strings + pivot) <= 0 && (begin <= high))
+            ++begin;
+        while (comp(strings + end, strings + pivot) > 0 && (end >= low))
+            --end;
+
+        if (begin < end)
+            SwapStrs(strings + begin, strings + end);
+    }
+
+    SwapStrs(strings + end, strings + pivot);
+    
+
+    if (end > low)
+        Qsort(strings, low, end - 1, comp);
+
+    Qsort(strings, end + 1, high, comp);
+}
+
+//--------------------------------------------------
+void SwapStrs(String* str1, String* str2) {
+
     assert(str1);
     assert(str2);
 
@@ -154,41 +186,6 @@ void SwapStrPtr(String* str1, String* str2)
     *str1 = *str2;
     *str2 = temp;
 }
-
-
-void Qsort(String* strings, int low, int high, int (*comp)(const void *, const void *))
-{ 
-    assert(strings);
-    assert(comp);
-
-    int left = low;
-    int right = high;
-
-    if (left >= right) 
-        return; //в массиве менее двух элементов 
-
-    const unsigned char* mid = strings[(right + left)/2].str_beg;
-
-    while(left <= right)
-    {
-        while ((*comp)(strings[left].str_beg, mid))
-            ++left;
-        while ((*comp)(mid, strings[right].str_beg))
-            --right;
-        if (left <= right)
-            ++left;
-            --right;
-            SwapStrPtr(&strings[left], &strings[right]);
-    }
-
-        if (low < right)
-            Qsort(strings, low, right, StrcmpBegin);
-
-        if (left < high)
-            Qsort(strings, left, high, StrcmpBegin);
-} 
-
-
 
 
 //----------------------------------------------------------------

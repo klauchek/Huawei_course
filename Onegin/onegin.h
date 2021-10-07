@@ -24,9 +24,10 @@ unsigned char* CreateBuffer(FILE *file, int file_size);
 String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strings);
 int StrcmpBegin(const void* str1, const void* str2);
 int StrcmpEnd(const void* str1, const void* str2);
-void SwapStrPtr(String* str1, String* str2);
-void Qsort(String* strings, int left, int right, int (*comp)(const char *, const char *));
 void FileWrite(String* Strings, const int amount_of_strings, const char* output_file_name);
+
+void SwapStrs(String* str1, String* str2);
+void Qsort(String* arr, int low, int high, int (*comp)(const void* str1, const void* str2));
 
 
 
