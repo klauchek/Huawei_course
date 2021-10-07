@@ -52,9 +52,8 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
         string_ptrs[counter].str_beg[cur_last - cur_start] = '\0';
         string_ptrs[counter].length = cur_last - cur_start + 1;
         new_size = new_size - (cur_last - cur_start + 1);
-        printf("new size is %d\n", new_size);
         ++counter;
-    
+
         cur_start = cur_last + 1;
 
         cur_last = (unsigned char *)memchr(cur_start, '\n', new_size);
