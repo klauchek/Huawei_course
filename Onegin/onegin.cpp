@@ -56,37 +56,8 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
     size_t counter = 0;
     
     while (*cur_last != '\0')
-    {
-        /*
-        unsigned char* begin = cur_start;
-        unsigned char* end = cur_last;
-
-        if(isspace(*begin))
-            while (isspace(*begin))
-            {
-                ++begin;
-                *begin = '\0';
-            }
-        if(isspace(*end))
-            while (isspace(*end))
-            {
-                --end;
-                *end = '\0';
-            }
-            
-        string_ptrs[counter].str_beg = begin;
-
-       // string_ptrs[counter].str_beg[cur_last - cur_start] = '\0';
-        string_ptrs[counter].length = end - begin + 1;
-        new_size = new_size - (cur_last - cur_start + 1);
-        ++counter;
-
-*/
-                    
+    {             
         string_ptrs[counter].str_beg = cur_start;
-
-        //unsigned char* end = cur_last - 1;
-
         string_ptrs[counter].str_beg[cur_last - cur_start] = '\0';
         string_ptrs[counter].length = cur_last - cur_start + 1;
         new_size = new_size - (cur_last - cur_start + 1);
@@ -100,6 +71,8 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
         {
             string_ptrs[counter].str_beg = cur_start;
             string_ptrs[counter].str_beg[new_size] = '\0';
+            string_ptrs[counter].length = new_size;
+
            *amount_of_strings = ++counter;
            return string_ptrs;
         }
@@ -107,14 +80,15 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
         if((capacity - counter) < DELTA)
         {
             capacity *= 2;
-            //! FIXME: creatwe tmp_str_ptrs
-            string_ptrs = (String*)realloc(string_ptrs, sizeof(String) * capacity);
+            string_ptrs = (String*) realloc(string_ptrs, sizeof(String) * capacity);
+
         }
     
     }
 
     if (capacity != counter)
         string_ptrs = (String*) realloc(string_ptrs, sizeof(String) * counter);
+
 
     *amount_of_strings = ++counter;
     return string_ptrs;
@@ -164,28 +138,28 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
     assert(str1);
     assert(str2);
 
-    const unsigned char* string1 = ((String*) str1)->str_beg + (((String*) str1)->length - 1);
-    const unsigned char* string2 = ((String*) str2)->str_beg + (((String*) str2)->length - 1);
+    const unsigned char* string1_beg = ((String*) str1)->str_beg;
+    const unsigned char* string2_beg = ((String*) str2)->str_beg;
     const unsigned char* string1_end = ((String*) str1)->str_beg + (((String*) str1)->length - 1);
     const unsigned char* string2_end = ((String*) str2)->str_beg + (((String*) str2)->length - 1);
 
 
     while (true)
     {
-        while(!isalpha (*string1) && (string1_end - string1 != ((String*) str1)->length - 1))
-            --string1;
-        while(!isalpha (*string2) && (string2_end - string2 != ((String*) str2)->length - 1))
-            --string2;
+        while(!isalpha (*string1_end) && (string1_end != string1_beg))
+            --string1_end;
+        while(!isalpha (*string2_end) && (string2_end != string2_beg))
+            --string2_end;
 
-        if (toupper (*string1) != toupper (*string2)|| string1 == ((String*)str1)->str_beg || string2 == ((String*)str2)->str_beg)
+        if (toupper (*string1_end) != toupper (*string2_end)|| string1_beg == string1_end || string2_beg == string2_end)
             break;
 
-        --string1;
-        --string2;
+        --string1_end;
+        --string2_end;
 
     }
 
-    return toupper(*string1) - toupper(*string2); 
+    return toupper(*string1_end) - toupper(*string2_end); 
 }
 
 //---------------------------------------------------------------------
@@ -251,9 +225,9 @@ void FileWrite(String* Strings, const int amount_of_strings, const char* output_
     FILE* output = fopen(output_file_name, "w+");
 
     //qsort(Strings, amount_of_strings, sizeof (String), StrcmpEnd);
-    qsort(Strings, amount_of_strings, sizeof (String), StrcmpBegin);
+    //qsort(Strings, amount_of_strings, sizeof (String), StrcmpBegin);
     //Qsort(Strings, 0, amount_of_strings - 1, StrcmpEnd);
-    //Qsort(Strings, 0, amount_of_strings - 1, StrcmpBegin);
+    Qsort(Strings, 0, amount_of_strings - 1, StrcmpBegin);
     
     fprintf(output, "Beginning sort\n\n");
     for (int i = 0; i < amount_of_strings; i++)
