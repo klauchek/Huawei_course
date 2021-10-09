@@ -11,7 +11,7 @@ size_t FileSize(const char* file_name)
 { 
   assert (file_name);
 
-  struct stat buff;
+  struct stat buff = {};
   stat (file_name, &buff);
 
   return buff.st_size;
@@ -30,14 +30,21 @@ unsigned char *CreateBuffer(FILE *file, int file_size)
     assert(file);
 
     unsigned char *buffer = (unsigned char *)calloc (file_size + 1, sizeof(char));
-    fread(buffer, sizeof(char), file_size, file);
+    assert(buffer);
+    size_t result = fread(buffer, sizeof(char), file_size, file);
+    assert(result);
+
     return buffer;
 }
 
 
 //---------------------------------------------------------------------
 //! Fuinctuon for separating strings
-//
+//! @param [in]  Buffer            buffer with text from file
+//! @param [in]  size              size of the buffer
+//! @param [out] amount_of_strings amount of strings in buffer 
+//! 
+//! @return buffer of strings
 //----------------------------------------------------------------------
 String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strings)
 {
@@ -97,7 +104,8 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
 
 //---------------------------------------------------------------------
 //! Fuinctuon for comparing strings from the beginning
-//
+//! @param [in]  str1  pointer to the first string
+//! @param [in]  str2  pointer to the second string
 //----------------------------------------------------------------------
  int StrcmpBegin(const void* str1, const void* str2)
  {
@@ -107,8 +115,6 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
      const unsigned char* string1 = ((String*) str1)->str_beg;
      const unsigned char* string2 = ((String*) str2)->str_beg;
     
-    
-
     while ((*string1 != '\0') && (*string2 != '\0'))
     {
         while(!isalpha (*string1) && (*string1) != '\0')
@@ -131,7 +137,8 @@ String* SeparateStrings(unsigned char* Buffer, size_t size, int* amount_of_strin
 
 //---------------------------------------------------------------------
 //! Fuinctuon for comparing strings from the end
-//
+//! @param [in]  str1  pointer to the first string
+//! @param [in]  str2  pointer to the second string
 //----------------------------------------------------------------------
  int StrcmpEnd(const void* str1, const void* str2)
 {
@@ -199,7 +206,8 @@ void Qsort(String* strings, int low, int high, int (*comp)(const void* str1, con
 
 //---------------------------------------------------------------------
 //! Fuinctuon for swapping strings
-//
+//! @param [in]  str1  pointer to the first string
+//! @param [in]  str2  pointer to the second string
 //----------------------------------------------------------------------
 void SwapStrs(String* str1, String* str2) {
 
@@ -213,23 +221,46 @@ void SwapStrs(String* str1, String* str2) {
 
 
 //---------------------------------------------------------------------
-//! Fuinctuon for writing sorted text to file 
-//
+//! Fuinctuon for sorting strings and creating files with sorted text
+//! @param [in] Strings             buffer of strings
+//! @param [in] amount_of_strings   amount of strings
+//! @param [in] output_filename_beg name of the file with beginning sorting
+//! @param [in] output_filename_end name of the file with ending sorting
 //----------------------------------------------------------------------
-void FileWrite(String* Strings, const int amount_of_strings, const char* output_file_name)
+void FileWrite(String* Strings, const int amount_of_strings, const char* output_filename_beg, const char* output_filename_end)
 {
     assert(Strings);
     assert(amount_of_strings);
-    assert(output_file_name);
+    assert(output_filename_beg);
+    assert(output_filename_end);
 
-    FILE* output = fopen(output_file_name, "w+");
+    FILE* output_beg = fopen(output_filename_beg, "w+");
 
-    //qsort(Strings, amount_of_strings, sizeof (String), StrcmpEnd);
-    //qsort(Strings, amount_of_strings, sizeof (String), StrcmpBegin);
-    //Qsort(Strings, 0, amount_of_strings - 1, StrcmpEnd);
-    Qsort(Strings, 0, amount_of_strings - 1, StrcmpBegin);
+    qsort(Strings, amount_of_strings, sizeof (String), StrcmpBegin);
+    //Qsort(Strings, 0, amount_of_strings - 1, StrcmpBegin);
     
-    fprintf(output, "Beginning sort\n\n");
+    fprintf(output_beg, "Beginning sort\n\n");
+    PrintStrings(output_beg, Strings, output_filename_beg, amount_of_strings);
+    fclose(output_beg);
+
+    FILE* output_end = fopen(output_filename_end, "w+");
+
+    qsort(Strings, amount_of_strings, sizeof (String), StrcmpEnd);
+    //Qsort(Strings, 0, amount_of_strings - 1, StrcmpEnd);
+
+    fprintf(output_end, "Endinging sort\n\n");
+    PrintStrings(output_end, Strings, output_filename_end, amount_of_strings);
+    fclose(output_end);
+}
+
+//---------------------------------------------------------------------
+//! Fuinctuon for writing sorted strings to file 
+//! @param [in] output              file for sorted text
+//! @param [in] amount_of_strings   amount of strings
+//! @param [in] output_filename_beg name of the file
+//----------------------------------------------------------------------
+void PrintStrings(FILE* output, String* Strings, const char* output_file_name, const int amount_of_strings)
+{
     for (int i = 0; i < amount_of_strings; i++)
     {
         unsigned char* begin = Strings[i].str_beg;
@@ -237,15 +268,4 @@ void FileWrite(String* Strings, const int amount_of_strings, const char* output_
             continue;
         fprintf(output, "%s\n", begin);
     }
-
-
-    fclose(output);
 }
-
-
-
-
-
-
-
-
