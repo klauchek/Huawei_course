@@ -1,0 +1,59 @@
+#include "stack.h"
+
+int main()
+{
+    Stack stk = {};
+
+    StackCtor(&stk, 10);
+
+    printf("Created empty stack for 10 elems\n");
+    for (int i = 0; i < stk.size; ++i)
+    {
+        printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
+    }
+
+    StackPush(&stk, 10);
+    printf("Pushed 10\n");
+    for (int i = 0; i < stk.size; ++i)
+    {
+        printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
+    }
+
+    StackPush(&stk, 20);
+    printf("Pushed 20\n");
+    for (int i = 0; i < stk.size; ++i)
+    {
+        printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
+    }
+
+    StackPush(&stk, 30);
+    printf("Pushed 30\n");
+    for (int i = 0; i < stk.size; ++i)
+    {
+        printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
+    }
+
+    StackPush(&stk, 40);
+    printf("Pushed 40\n");
+    for (int i = 0; i < stk.size; ++i)
+    {
+        printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
+    }
+
+    double x = StackPop(&stk);
+    printf("Poped 40\n");
+    printf("cur cap = %d, cur size = %d\n", stk.capacity, stk.size);
+    for (int i = 0; i < stk.size; ++i)
+    {
+        printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
+    }
+
+    StackResize(&stk, 20);
+    printf("cur cap = %d, cur size = %d\n", stk.capacity, stk.size);
+
+
+
+    StackDtor(&stk);
+
+    return 0;
+}
