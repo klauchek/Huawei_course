@@ -7,10 +7,10 @@ int main()
     StackCtor(&stk, 10);
 
     printf("Created empty stack for 10 elems\n");
-    for (int i = 0; i < stk.size; ++i)
-    {
-        printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
-    }
+    //for (int i = 0; i < stk.size; ++i)
+    //{
+    //    printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
+   // }
 
     StackPush(&stk, 10);
     printf("Pushed 10\n");
@@ -40,16 +40,16 @@ int main()
         printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
     }
 
-    double x = StackPop(&stk);
+    StackPop(&stk);
     printf("Poped 40\n");
-    printf("cur cap = %d, cur size = %d\n", stk.capacity, stk.size);
+    printf("cur cap = %ld, cur size = %ld\n", stk.capacity, stk.size);
     for (int i = 0; i < stk.size; ++i)
     {
         printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
     }
 
     StackResize(&stk, 20);
-    printf("cur cap = %d, cur size = %d\n", stk.capacity, stk.size);
+    printf("cur cap = %ld, cur size = %ld\n", stk.capacity, stk.size);
 
 
 
