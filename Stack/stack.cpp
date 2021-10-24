@@ -14,7 +14,7 @@ int StackCtor(Stack* stk, size_t cap)
     stk->canary2 = CANARY_VALUE2;
     #endif //CANARY_PROTECTION
 
-    stk->data = (Elem*)calloc(cap * sizeof(Elem) + 2*sizeof(canary_t), sizeof(char));
+    stk->data = (Elem*)calloc(cap * sizeof(Elem) + 2 * sizeof(canary_t), sizeof(stk->data[0]));
     if(!stk->data)
         return MEMORY_ERROR;
 
