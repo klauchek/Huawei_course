@@ -14,8 +14,6 @@
 
 #define Data ((Elem*)(stk->data + sizeof(canary_t)))
 
-const char FILENAME[] = "output.txt";
-
 typedef double Elem; //пока что
 
 #ifdef CANARY_PROTECTION
@@ -30,16 +28,16 @@ const Elem POISON_VALUE = 666;
 
 enum Errors
 {
-    STACK_OK     =  0, //All was ok
-    NOT_A_STACK  =  1, //If struct wasn't stack
-    MEMORY_ERROR =  2, //Not enough memory or another memerror
-    OVERFLOW     =  3, //Size > capacity or needed size error
-    UNDERFLOW    =  4, //Size <= 0
+    STACK_OK     =  0,
+    NOT_A_STACK  =  1,
+    MEMORY_ERROR =  2,
+    OVERFLOW     =  3,
+    UNDERFLOW    =  4,
     POP_ERROR    =  5, //Something went wrong in Pop func
     PUSH_ERROR   =  6, //Something went wrong in Push func
     RESIZE_ERROR =  7, //Something went wrong in Resize func
-    DTOR_ERROR   =  8, //If dtor was called twice or another dtor error
-    CTOR_ERROR   =  9, //If ctor was called twice or another ctor error
+    DTOR_ERROR   =  8,
+    CTOR_ERROR   =  9, 
     CANARY_STK   = 10, //If one of stack canaries have been changed
     CANARY_DATA  = 11, //If one of data canaries have been changed
     HASH_DATA    = 12, //If data hash has been changed without reason
@@ -72,10 +70,9 @@ int StackResize(Stack* stk, const size_t new_cap);
 void StackDump(Stack* stk);
 int StackOK(const Stack* stk); //обработка всевозможных ошибок
 void StackFillPoison(Stack* stk, int elem);
+char* ErrorsProcessing(Stack* stk);
+void StackCheck(Stack *stk);
 
-void ErrorsProcessing(Stack* stk, int cur_line, int error);
-
-//error verification - стопка сообщений
 //dump - их вывод в файл
 
 

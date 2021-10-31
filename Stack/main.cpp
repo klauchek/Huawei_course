@@ -4,9 +4,11 @@ int main()
 {
     Stack stk = {};
 
+    StackPop(&stk);
     StackCtor(&stk, 10);
+    
 
-    printf("Created empty stack for 10 elems\n");
+    //printf("Created empty stack for 10 elems\n");
     //for (int i = 0; i < stk.size; ++i)
     //{
     //    printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
