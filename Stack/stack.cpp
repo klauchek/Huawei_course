@@ -1,10 +1,11 @@
 #include "stack.h"
 
+FILE* output = fopen("output.txt", "a");
 
 int StackCtor(Stack* stk, size_t cap)
 {
-    if (stk->capacity > 0 || !stk)
-        return CTOR_ERROR;
+    STK_CHECK(stk, stk, NOT_A_STACK);
+    STK_CHECK(stk->capacity == 0, stk, CTOR_ERROR);
 
     #ifdef CANARY_PROTECTION
     stk->canary1 = CANARY_VALUE1;
@@ -12,13 +13,10 @@ int StackCtor(Stack* stk, size_t cap)
     #endif //CANARY_PROTECTION
 
     stk->data = (Elem*)calloc(cap * sizeof(Elem) + 2 * sizeof(canary_t), sizeof(stk->data[0]));
-    if(!stk->data)
-        return MEMORY_ERROR;
-
+    STK_CHECK(stk->data, stk, MEMORY_ERROR);
+ 
     stk->capacity = cap;
     stk->size = 0;
-
-    StackFillPoison(stk, 0);
 
     #ifdef CANARY_PROTECTION
     stk->canary1_data = (canary_t*)(stk->data);
@@ -27,63 +25,71 @@ int StackCtor(Stack* stk, size_t cap)
     *(stk->canary2_data) = CANARY_DATA2;
     #endif //CANARY_PROTECTION
 
-    StackCheck(stk);
+    StackFillPoison(stk, 0);
 
     return STACK_OK;
 };
 
 int StackDtor(Stack* stk)
 {
-    StackCheck(stk);
+    STK_CHECK(stk, stk, NOT_A_STACK);
+    STK_CHECK(stk->data, stk, DTOR_ERROR);
 
     free(stk->data);
     stk->data = NULL;
-    stk->size = -1;
-    stk->capacity = -1;
+    stk->size = 0;
+    stk->capacity = 0;
 
     return STACK_OK;
 };
 
 int StackPush(Stack* stk, Elem value)
 {
-    StackCheck(stk);
+    STK_CHECK(stk, stk, NOT_A_STACK);
+
+    #ifdef CANARY_PROTECTION
+    STK_CHECK((stk->canary1 == CANARY_VALUE1 && stk->canary2 == CANARY_VALUE2), stk, CANARY_STK);
+    STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && *(stk->canary2_data) == CANARY_DATA2), stk, CANARY_DATA);
+    #endif //CANARY_PROTECTION
 
     if((stk->size + 1) >= stk->capacity)
-        if(!StackResize(stk, 2 * stk->capacity))
-            return PUSH_ERROR;
+        STK_CHECK(StackResize(stk, 2 * stk->capacity), stk, RESIZE_ERROR);
 
     Data[stk->size] = value;
     ++stk->size;
 
-    StackCheck(stk);
     return STACK_OK;
 };
 
 int StackPop(Stack* stk)
 {
-    StackCheck(stk);
+    STK_CHECK(stk, stk, NOT_A_STACK);
+    STK_CHECK(stk->size, stk, UNDERFLOW);
 
-    if (stk->size == 0)
-        return UNDERFLOW;
+    #ifdef CANARY_PROTECTION
+    STK_CHECK((stk->canary1 == CANARY_VALUE1 && stk->canary2 == CANARY_VALUE2), stk, CANARY_STK);
+    STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && *(stk->canary2_data) == CANARY_DATA2), stk, CANARY_DATA);
+    #endif //CANARY_PROTECTION
 
     Data[stk->size] = POISON_VALUE;
     --stk->size;
-
-    StackCheck(stk);
+//  тоже сделать ресайз даун
     return STACK_OK;
 };
 
 int StackResize(Stack* stk, const size_t new_cap)
 {
-    StackCheck(stk);
+    STK_CHECK(stk, stk, NOT_A_STACK);
+    STK_CHECK(new_cap >= stk->size, stk, RESIZE_ERROR);
 
-    if(new_cap < stk->size)
-        return RESIZE_ERROR;
+    #ifdef CANARY_PROTECTION
+    STK_CHECK((stk->canary1 == CANARY_VALUE1 && stk->canary2 == CANARY_VALUE2), stk, CANARY_STK);
+    STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && *(stk->canary2_data) == CANARY_DATA2), stk, CANARY_DATA);
+    #endif //CANARY_PROTECTION
 
     Elem* new_data = (Elem*)realloc(stk->data, new_cap * sizeof(Elem) + 2 * sizeof(canary_t));
 
-    if (!new_data)
-        return MEMORY_ERROR;
+    STK_CHECK(new_data, stk, MEMORY_ERROR);
 
     stk->data = new_data;
     stk->capacity = new_cap;
@@ -94,106 +100,68 @@ int StackResize(Stack* stk, const size_t new_cap)
 	*(stk->canary2_data) = CANARY_DATA2;
     #endif //CANARY_PROTECTION
 
-    StackCheck(stk);
     return STACK_OK;
 };
 
 //elem - num of elem from which to fill
-void StackFillPoison(Stack* stk, int elem)
+void StackFillPoison(Stack* stk, size_t elem)
 {
 	assert(stk);
 
-	for (int i = elem; i < stk->capacity; ++i)
+	for (size_t i = elem; i < stk->capacity; ++i)
 	{
 		Data[i] = POISON_VALUE;
+        printf("hey\n");
 	}
 }
 
-int StackOK(const Stack* stk)
+
+void ErrorsProcessing(int error)
 {
-    //вернуть 0, есои все хорошо
-    //вернуть код ошибки, если нет
-    if (stk == NULL)
-        return NOT_A_STACK;
-    
-    if(stk->data == NULL)
-        return DTOR_ERROR;
-    
-    if (stk->size > stk->capacity)
-        return OVERFLOW;
-    
-    if (stk->capacity <= 0)
-        return UNDERFLOW;
-
-
-    #ifdef CANARY_PROTECTION
-    
-    if (stk->canary1 != CANARY_VALUE1 || stk->canary2 != CANARY_VALUE2)
-        return CANARY_STK;
-    if (*(stk->canary1_data) != CANARY_DATA1 || *(stk->canary2_data) != CANARY_DATA2)
-        return CANARY_DATA;
-
-    #endif //CANARY_PROTECTION 
-
-    
-    #ifdef HASH_PROTECTION
-
-    ///////////////////////////
-
-    #endif //HASH_PROTECTION 
-
-
-    return STACK_OK;
-}
-
-char* ErrorsProcessing(int error)
-{
-    char* comment = (char*)calloc(50, sizeof(char));
-
     switch(error)
     {
         case NOT_A_STACK:
-            comment = "Stack pointer is NULL";
+            fprintf(output, "Stack pointer is NULL\n");
             break;
 
         case MEMORY_ERROR:
-            comment = "Not enough memory or another memory error";
+            fprintf(output, "Not enough memory or another memory error\n");
             break;
     
         case OVERFLOW:
-            comment = "Stack is overflow: size > capacity";
+            fprintf(output, "Stack is overflow: size > capacity\n");
             break;
     
         case UNDERFLOW:
-            comment = "Stack is underflow: size <= 0";
+            fprintf(output, "Stack is underflow: size <= 0\n");
             break;
     
         case POP_ERROR:
-            comment = "Something went wrong in Pop func";
+            fprintf(output, "Something went wrong in Pop func\n");
             break;
         
         case PUSH_ERROR:
-            comment = "Something went wrong in Push func";
+            fprintf(output, "Something went wrong in Push func\n");
             break;
     
         case RESIZE_ERROR:
-            comment = "Something went wrong in resize func";
+            fprintf(output, "Something went wrong in resize func\n");
             break;
 
         case DTOR_ERROR:
-            comment = "Dtor was called twice or another dtor error";
+            fprintf(output, "Dtor was called twice or another dtor error\n");
             break;
     
         case CTOR_ERROR:
-            comment = "Ctor was called twice or another ctor error";
+            fprintf(output, "Ctor was called twice or another ctor error\n");
             break;
 
         case CANARY_STK:
-            comment = "One of stack canaries has been changed";
+            fprintf(output, "One of stack canaries has been changed\n");
             break;
 
         case CANARY_DATA:
-            comment = "One of stack canaries has been changed";
+            fprintf(output, "One of stack canaries has been changed\n");
             break;
         
         /*case HASH_DATA:
@@ -206,20 +174,15 @@ char* ErrorsProcessing(int error)
 
         default:
 
-            comment = "All is OK";
+            fprintf(output, "All is OK\n");
     }
-
-    char* output = comment;
-    free(comment);
-
-    return output;
 }
 
 
-void StackDump(Stack *stk, int error) {
+void StackDump(Stack *stk, int error, FILE* output) {
 
-    FILE* output = fopen("output.txt", "w");
-    fprintf(output, "Error code: %d", error);
+    //FILE* output = fopen("output.txt", "wb");
+    fprintf(output, "Error code: %d\n", error);
     fprintf (output, "Stack pointer = [%p]\n", stk);
 
     fprintf (output, "Capacity: %lu \n", stk->capacity);
@@ -247,23 +210,20 @@ void StackDump(Stack *stk, int error) {
 
     fprintf (output, "============================\n");
 
-    fclose(output);
+    //fclose(output);
 }
 
 
-void StackCheck(Stack *stk)
+int StackCheck(bool condition, Stack *stk, int error, const char *file, const int line, const char *function)
 {
-    FILE* output = fopen("output.txt", "w");
-    int error = StackOK(stk);
-    if (error)
+    if (!condition)
     {
         assert(output);
-        char* comment = ErrorsProcessing(error);
-        fprintf(output, "Error %d: file %s line %d ", error, __FILE__, __LINE__);
-        fprintf(output, "function '%s'\n", __FUNCTION__);
-        fprintf(output, "Error description: %s\n\n", comment);
-        fclose(output);
-        StackDump(stk, error);
+        fprintf(output, "Error %d: file %s line %d\n", error, file, line);
+        fprintf(output, "function '%s'\n", function);
+        ErrorsProcessing(error);
+        StackDump(stk, error, output);
     }
-    fclose(output);
+
+    return error;
 }
