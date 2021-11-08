@@ -5,7 +5,7 @@ FILE* output = fopen("output.txt", "a");
 int StackCtor(Stack* stk, size_t cap)
 {
     STK_CHECK(stk, stk, NOT_A_STACK);
-    STK_CHECK(stk->capacity == 0, stk, CTOR_ERROR);
+    STK_CHECK((stk->capacity == 0), stk, CTOR_ERROR);
 
     #ifdef CANARY_PROTECTION
     stk->canary1 = CANARY_VALUE1;
@@ -18,14 +18,14 @@ int StackCtor(Stack* stk, size_t cap)
     stk->capacity = cap;
     stk->size = 0;
 
+    StackFillPoison(stk, 0);
+
     #ifdef CANARY_PROTECTION
     stk->canary1_data = (canary_t*)(stk->data);
     *(stk->canary1_data) = CANARY_DATA1;
-    stk->canary2_data = (canary_t*)(stk->data + sizeof(canary_t) + stk->capacity * sizeof(Elem));
+    stk->canary2_data = (canary_t*)(stk->data + sizeof(canary_t) + cap * sizeof(Elem));
     *(stk->canary2_data) = CANARY_DATA2;
     #endif //CANARY_PROTECTION
-
-    StackFillPoison(stk, 0);
 
     return STACK_OK;
 };
@@ -35,8 +35,9 @@ int StackDtor(Stack* stk)
     STK_CHECK(stk, stk, NOT_A_STACK);
     STK_CHECK(stk->data, stk, DTOR_ERROR);
 
+    //StackFillPoison(stk, 0);
     free(stk->data);
-    stk->data = NULL;
+
     stk->size = 0;
     stk->capacity = 0;
 
@@ -49,14 +50,19 @@ int StackPush(Stack* stk, Elem value)
 
     #ifdef CANARY_PROTECTION
     STK_CHECK((stk->canary1 == CANARY_VALUE1 && stk->canary2 == CANARY_VALUE2), stk, CANARY_STK);
-    STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && *(stk->canary2_data) == CANARY_DATA2), stk, CANARY_DATA);
+    STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && (*(stk->canary2_data)) == CANARY_DATA2), stk, CANARY_DATA);
     #endif //CANARY_PROTECTION
 
-    if((stk->size + 1) >= stk->capacity)
-        STK_CHECK(StackResize(stk, 2 * stk->capacity), stk, RESIZE_ERROR);
+    STK_CHECK((stk->size <= stk->capacity), stk, OVERFLOW);
 
-    Data[stk->size] = value;
-    ++stk->size;
+    if(stk->size == stk->capacity)
+    {
+        if(StackResize(stk, stk->capacity * 2))
+            STK_CHECK(false, stk, RESIZE_ERROR);
+    }
+
+    Data[stk->size++] = value;
+    printf("new el is here!!\n");
 
     return STACK_OK;
 };
@@ -68,23 +74,25 @@ int StackPop(Stack* stk)
 
     #ifdef CANARY_PROTECTION
     STK_CHECK((stk->canary1 == CANARY_VALUE1 && stk->canary2 == CANARY_VALUE2), stk, CANARY_STK);
-    STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && *(stk->canary2_data) == CANARY_DATA2), stk, CANARY_DATA);
+    STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && (*(stk->canary2_data)) == CANARY_DATA2), stk, CANARY_DATA);
     #endif //CANARY_PROTECTION
 
-    Data[stk->size] = POISON_VALUE;
+    //resize down??
+    Data[stk->size - 1] = POISON_VALUE;
+    //StackFillPoison(stk, stk->size);
     --stk->size;
-//  тоже сделать ресайз даун
+
     return STACK_OK;
 };
 
 int StackResize(Stack* stk, const size_t new_cap)
 {
     STK_CHECK(stk, stk, NOT_A_STACK);
-    STK_CHECK(new_cap >= stk->size, stk, RESIZE_ERROR);
+    STK_CHECK((new_cap >= stk->size), stk, RESIZE_ERROR);
 
     #ifdef CANARY_PROTECTION
     STK_CHECK((stk->canary1 == CANARY_VALUE1 && stk->canary2 == CANARY_VALUE2), stk, CANARY_STK);
-    STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && *(stk->canary2_data) == CANARY_DATA2), stk, CANARY_DATA);
+    STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && (*(stk->canary2_data)) == CANARY_DATA2), stk, CANARY_DATA);
     #endif //CANARY_PROTECTION
 
     Elem* new_data = (Elem*)realloc(stk->data, new_cap * sizeof(Elem) + 2 * sizeof(canary_t));
@@ -93,7 +101,7 @@ int StackResize(Stack* stk, const size_t new_cap)
 
     stk->data = new_data;
     stk->capacity = new_cap;
-    StackFillPoison(stk, stk->size);
+    //StackFillPoison(stk, stk->size);
 
     #ifdef CANARY_PROTECTION
     stk->canary2_data = (canary_t*)(stk->data + stk->capacity * sizeof(Elem) + 2 * sizeof(canary_t));
@@ -111,7 +119,6 @@ void StackFillPoison(Stack* stk, size_t elem)
 	for (size_t i = elem; i < stk->capacity; ++i)
 	{
 		Data[i] = POISON_VALUE;
-        printf("hey\n");
 	}
 }
 
@@ -165,11 +172,9 @@ void ErrorsProcessing(int error)
             break;
         
         /*case HASH_DATA:
-            comment =
             break;
 
         case HASH_STK:
-            comment =
             break; */
 
         default:
@@ -182,7 +187,7 @@ void ErrorsProcessing(int error)
 void StackDump(Stack *stk, int error, FILE* output) {
 
     //FILE* output = fopen("output.txt", "wb");
-    fprintf(output, "Error code: %d\n", error);
+    fprintf(output, "\nError code: %d\n", error);
     fprintf (output, "Stack pointer = [%p]\n", stk);
 
     fprintf (output, "Capacity: %lu \n", stk->capacity);
