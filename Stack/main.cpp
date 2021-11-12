@@ -13,11 +13,6 @@ int main()
     printf("Pushed 10\n");
     printf("cur cap = %ld, cur size = %ld\n", stk.capacity, stk.size);
 
-   /* for (int i = 0; i < stk.size; ++i)
-    {
-        printf("%lf\n", ((Elem*)(stk.data + sizeof(canary_t)))[i]);
-    }  */
-
 
     StackPop(&stk);
     printf("Poped 10\n");

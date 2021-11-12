@@ -27,6 +27,10 @@ int StackCtor(Stack* stk, size_t cap)
     *(stk->canary2_data) = CANARY_DATA2;
     #endif //CANARY_PROTECTION
 
+    #ifdef HASH_PROTECTION
+    stk->HashSum = Hash(stk);
+    #endif //HASH_PROTECTION
+
     return STACK_OK;
 };
 
@@ -35,7 +39,6 @@ int StackDtor(Stack* stk)
     STK_CHECK(stk, stk, NOT_A_STACK);
     STK_CHECK(stk->data, stk, DTOR_ERROR);
 
-    //StackFillPoison(stk, 0);
     free(stk->data);
 
     stk->size = 0;
@@ -53,6 +56,10 @@ int StackPush(Stack* stk, Elem value)
     STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && (*(stk->canary2_data)) == CANARY_DATA2), stk, CANARY_DATA);
     #endif //CANARY_PROTECTION
 
+    #ifdef HASH_PROTECTION
+    STK_CHECK((stk->HashSum == Hash(stk)), stk, HASH)
+    #endif //HASH_PROTECTION
+
     STK_CHECK((stk->size <= stk->capacity), stk, OVERFLOW);
 
     if(stk->size == stk->capacity)
@@ -62,7 +69,10 @@ int StackPush(Stack* stk, Elem value)
     }
 
     Data[stk->size++] = value;
-    printf("new el is here!!\n");
+
+    #ifdef HASH_PROTECTION
+    stk->HashSum = Hash(stk);
+    #endif //HASH_PROTECTION
 
     return STACK_OK;
 };
@@ -77,10 +87,17 @@ int StackPop(Stack* stk)
     STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && (*(stk->canary2_data)) == CANARY_DATA2), stk, CANARY_DATA);
     #endif //CANARY_PROTECTION
 
-    //resize down??
+    #ifdef HASH_PROTECTION
+    STK_CHECK((stk->HashSum == Hash(stk)), stk, HASH)
+    #endif //HASH_PROTECTION
+
+
     Data[stk->size - 1] = POISON_VALUE;
-    //StackFillPoison(stk, stk->size);
     --stk->size;
+
+    #ifdef HASH_PROTECTION
+    stk->HashSum = Hash(stk);
+    #endif //HASH_PROTECTION
 
     return STACK_OK;
 };
@@ -95,18 +112,27 @@ int StackResize(Stack* stk, const size_t new_cap)
     STK_CHECK((*(stk->canary1_data) == CANARY_DATA1 && (*(stk->canary2_data)) == CANARY_DATA2), stk, CANARY_DATA);
     #endif //CANARY_PROTECTION
 
+    #ifdef HASH_PROTECTION
+    STK_CHECK((stk->HashSum == Hash(stk)), stk, HASH)
+    #endif //HASH_PROTECTION
+
+
     Elem* new_data = (Elem*)realloc(stk->data, new_cap * sizeof(Elem) + 2 * sizeof(canary_t));
 
     STK_CHECK(new_data, stk, MEMORY_ERROR);
 
     stk->data = new_data;
     stk->capacity = new_cap;
-    //StackFillPoison(stk, stk->size);
+    StackFillPoison(stk, stk->size);
 
     #ifdef CANARY_PROTECTION
     stk->canary2_data = (canary_t*)(stk->data + stk->capacity * sizeof(Elem) + 2 * sizeof(canary_t));
 	*(stk->canary2_data) = CANARY_DATA2;
     #endif //CANARY_PROTECTION
+
+    #ifdef HASH_PROTECTION
+    stk->HashSum = Hash(stk);
+    #endif //HASH_PROTECTION
 
     return STACK_OK;
 };
@@ -146,10 +172,6 @@ void ErrorsProcessing(int error)
         case POP_ERROR:
             fprintf(output, "Something went wrong in Pop func\n");
             break;
-        
-        case PUSH_ERROR:
-            fprintf(output, "Something went wrong in Push func\n");
-            break;
     
         case RESIZE_ERROR:
             fprintf(output, "Something went wrong in resize func\n");
@@ -171,11 +193,9 @@ void ErrorsProcessing(int error)
             fprintf(output, "One of stack canaries has been changed\n");
             break;
         
-        /*case HASH_DATA:
+        case HASH:
+            (output, "Hash has been changed without reason\n");
             break;
-
-        case HASH_STK:
-            break; */
 
         default:
 
@@ -193,11 +213,11 @@ void StackDump(Stack *stk, int error, FILE* output) {
     fprintf (output, "Capacity: %lu \n", stk->capacity);
     fprintf (output, "Size : %lu \n", stk->size);
 
-    //fprintf (output, "* HashSum      = [%llu]\n", (stk->HashSum));
-    //fprintf (output, "* True HashSum = [%llu]\n", stk(thou));
-
-    //fprintf (output, "Data = [%p]\n", (stk->data));
-
+    #ifdef HASH_PROTECTION
+    fprintf (output, "HashSum = [%llu]\n", (stk->HashSum));
+    fprintf (output, "True HashSum = [%llu]\n", Hash(stk));
+    #endif //HASH_PROTECTION
+    
     #ifdef CANARY_PROTECTION
     fprintf (output, "Left Canary  = [%lx]\n", stk->canary1);
     fprintf (output, "Right Canary = [%lx]\n", stk->canary2);
@@ -231,4 +251,34 @@ int StackCheck(bool condition, Stack *stk, int error, const char *file, const in
     }
 
     return error;
+}
+
+unsigned long long Hash (Stack* stk)
+{
+    char* stack_buffer = (char *) stk;
+
+    unsigned long long old_hash = stk->HashSum;
+    stk->HashSum = 0;
+
+    unsigned long long new_hash = 0;
+
+    for (int i = 0; i < sizeof (*stk); i++)
+    {
+        new_hash = ROR (new_hash) + stack_buffer[i];
+    }
+
+    char * data_buffer = (char *) stk->data - sizeof(canary_t);
+    for (size_t i = 0; i < stk->capacity * sizeof (Elem) + 2 * sizeof (canary_t); i++)
+    {
+        new_hash = ROR (new_hash) + data_buffer[i];
+    }
+
+    stk->HashSum = old_hash;
+
+    return new_hash;
+}
+
+unsigned long long ROR (unsigned long long elem)
+{
+  return (elem >> 1 | elem << 63);
 }

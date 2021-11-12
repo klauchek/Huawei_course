@@ -46,15 +46,13 @@ enum Errors
     MEMORY_ERROR =  2,
     OVERFLOW     =  3,
     UNDERFLOW    =  4,
-    POP_ERROR    =  5, 
-    PUSH_ERROR   =  6, 
-    RESIZE_ERROR =  7, 
-    DTOR_ERROR   =  8,
-    CTOR_ERROR   =  9, 
-    CANARY_STK   = 10,
-    CANARY_DATA  = 11,
-    HASH_DATA    = 12,
-    HASH_STK     = 13
+    POP_ERROR    =  5,  
+    RESIZE_ERROR =  6, 
+    DTOR_ERROR   =  7,
+    CTOR_ERROR   =  8, 
+    CANARY_STK   =  9,
+    CANARY_DATA  = 10,
+    HASH         = 11,
 };
 
 struct Stack
@@ -62,17 +60,20 @@ struct Stack
     #ifdef CANARY_PROTECTION
     canary_t canary1;
     canary_t *canary1_data;
-    #endif
+    #endif //CANARY_PROTECTION
 
     Elem* data;
     size_t size;
     size_t capacity;
-//hash
+
+    #ifdef HASH_PROTECTION
+    unsigned long long HashSum;
+    #endif //HASH_PROTECTION
 
     #ifdef CANARY_PROTECTION
     canary_t canary2;
     canary_t *canary2_data;
-    #endif
+    #endif //CANARY_PROTECTION
 };
 
 int StackCtor(Stack* stk, size_t cap);
@@ -81,9 +82,10 @@ int StackPush(Stack* stk, Elem value);
 int StackPop(Stack* stk);
 int StackResize(Stack* stk, const size_t new_cap);
 void StackDump(Stack* stk, int error, FILE* output);
-//int StackOK(const Stack* stk); //обработка всевозможных ошибок
 void StackFillPoison(Stack* stk, size_t elem);
 void ErrorsProcessing(Stack* stk);
 int StackCheck(bool condition, Stack *stk, int error, const char *file, const int line, const char *function);
+unsigned long long Hash (Stack* stk);
+unsigned long long ROR (unsigned long long elem);
 
 #endif
