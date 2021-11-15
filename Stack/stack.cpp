@@ -204,9 +204,9 @@ void ErrorsProcessing(int error)
 }
 
 
-void StackDump(Stack *stk, int error, FILE* output) {
+void StackDump(Stack *stk, int error, FILE* output)
+{
 
-    //FILE* output = fopen("output.txt", "wb");
     fprintf(output, "\nError code: %d\n", error);
     fprintf (output, "Stack pointer = [%p]\n", stk);
 
@@ -281,4 +281,122 @@ unsigned long long Hash (Stack* stk)
 unsigned long long ROR (unsigned long long elem)
 {
   return (elem >> 1 | elem << 63);
+}
+
+
+void TestProcessing()
+{
+    Stack stk = {};
+    int func_code = 0;
+    size_t stk_cap = 0;
+    size_t num_of_elems = 0;
+    Elem stk_elem = 0;
+    size_t new_stk_cap = 0;
+
+    printf ("Enter the number of the function you want to test (correct work): \n\n");
+    printf (" Constructor - 1\n Destructor - 2\n Push - 3\n Pop - 4\n Resize - 5\n");
+
+    scanf("%d", &func_code);
+
+    switch (func_code)
+    {
+    case 1:
+        printf ("Enter stack capacity: \n");
+        scanf("%zu", &stk_cap);
+
+        StackCtor(&stk, stk_cap);
+        printf("Created stack with cap = %zu\n", stk_cap);
+        StackDtor(&stk);
+        break;
+
+    case 2:
+        StackCtor(&stk, 0);
+        
+        StackDtor(&stk);
+        printf("Dtor called\n");
+        break;
+
+    case 3:
+        printf ("Enter stack capacity: \n");
+        scanf("%zu", &stk_cap);
+
+        StackCtor(&stk, stk_cap);
+        printf("Created stack with cap = %zu\n", stk_cap);
+
+        printf("Enter how many numbers to push: \n");
+        scanf("%zu", &num_of_elems);
+        printf("Enter numbers to push: \n");
+
+        for(int i = 0; i < num_of_elems; ++i)
+        {
+            scanf("%d", &stk_elem);
+            StackPush(&stk, stk_elem);
+        }
+
+        StackDtor(&stk);
+        break;
+
+    case 4:
+        StackCtor(&stk, 2);
+        StackPush(&stk, 10);
+        StackPop(&stk);
+        printf("Pushed and then poped 10\n");
+        StackDtor(&stk);
+        break;
+
+    case 5:
+        StackCtor(&stk, 0);
+        printf("Created stack with cap = %zu", stk.capacity);
+        printf("Enter new cap:");
+        
+        scanf("%zu", &new_stk_cap);
+        StackResize(&stk, new_stk_cap);
+        printf("New capacity is: %zu\n", stk.capacity);
+        StackDtor(&stk);
+        break;
+    
+    default:
+        break;
+    }
+
+    printf ("\n====================================================================\n");
+    printf ("Enter the number of the function you want to break (incorrect work): \n\n");
+    printf (" Constructor - 1\n Destructor - 2\n Pop - 3\n Resize - 4\n");
+
+    scanf("%d", &func_code);
+
+    switch (func_code)
+    {
+    case 1:
+        StackCtor(&stk, 2);
+        printf("Created stk with cap = 2\n");
+
+        StackCtor(&stk, 1);
+        printf("Created stk with cap = 2\n");
+        break;
+
+    case 2:
+
+        StackCtor(&stk, 0);
+        StackDtor(&stk);
+        printf("Dtor called. Trying to call for the second time\n");
+        StackDtor(&stk);
+        break;
+
+    case 3:
+        StackCtor(&stk, 0);
+        printf("Created stk with cap = 0 and calling StackPop\n");
+        StackPop(&stk);
+        break;
+
+    case 4:
+        StackCtor(&stk, 1);
+        StackPush(&stk, 10);
+        printf("Created stk with cap = 1 and 1 element and calling StackPop\n");
+        StackResize(&stk, 0);
+        break;
+
+    default:
+        break;
+    }
 }

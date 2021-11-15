@@ -1,0 +1,49 @@
+Error 8: file /home/mash/Code/Huawei_course/Stack/stack.cpp line 8
+function 'StackCtor'
+Ctor was called twice or another ctor error
+
+Error code: 8
+Stack pointer = [0x7fff9c508690]
+Capacity: 2 
+Size : 0 
+HashSum = [10790940222389486622]
+True HashSum = [10790940222389486622]
+Left Canary  = [bababeda]
+Right Canary = [badadeda]
+Left Canary data = [5654c17f8d20]
+Right Canary data = [5654c17f8d60]
+Stack Elements: 
+============================
+Error 4: file /home/mash/Code/Huawei_course/Stack/stack.cpp line 83
+function 'StackPop'
+Stack is underflow: size <= 0
+
+Error code: 4
+Stack pointer = [0x7ffff1d2bef0]
+Capacity: 0 
+Size : 0 
+HashSum = [4961908629679643671]
+True HashSum = [4961908629679643671]
+Left Canary  = [bababeda]
+Right Canary = [badadeda]
+Left Canary data = [557cafb0bcf0]
+Right Canary data = [557cafb0bd10]
+Stack Elements: 
+============================
+Error 6: file /home/mash/Code/Huawei_course/Stack/stack.cpp line 108
+function 'StackResize'
+Something went wrong in resize func
+
+Error code: 6
+Stack pointer = [0x7ffebe3e7640]
+Capacity: 1 
+Size : 1 
+HashSum = [15550552766295318723]
+True HashSum = [15550552766295318723]
+Left Canary  = [bababeda]
+Right Canary = [badadeda]
+Left Canary data = [558064ddfcf0]
+Right Canary data = [558064ddfd20]
+Stack Elements: 
+0.000000
+============================
